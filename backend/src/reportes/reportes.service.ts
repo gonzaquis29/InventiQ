@@ -74,6 +74,40 @@ export class ReportesService {
     return { ingresos, costos, ganancia: ingresos - costos };
   }
 
+  async valorizacionInventario(topN = 10) {
+    const productos = await this.prisma.producto.findMany({
+      where: { activo: true },
+      select: { id: true, nombre: true, stock: true, stockMinimo: true, precioCompra: true, precioVenta: true },
+    });
+
+    let valorCosto = 0;
+    let valorVenta = 0;
+    let totalUnidades = 0;
+    let productosStockBajo = 0;
+
+    const conValor = productos.map((p) => {
+      const costo = p.stock * Number(p.precioCompra);
+      const venta = p.stock * Number(p.precioVenta);
+      valorCosto += costo;
+      valorVenta += venta;
+      totalUnidades += p.stock;
+      if (p.stock <= p.stockMinimo) productosStockBajo++;
+      return { id: p.id, nombre: p.nombre, stock: p.stock, valorCosto: costo, valorVenta: venta };
+    });
+
+    const topProductos = conValor.sort((a, b) => b.valorCosto - a.valorCosto).slice(0, topN);
+
+    return {
+      totalProductos: productos.length,
+      totalUnidades,
+      valorCosto,
+      valorVenta,
+      gananciaPotencial: valorVenta - valorCosto,
+      productosStockBajo,
+      topProductos,
+    };
+  }
+
   async cierresCaja({ desde, hasta }: RangoFechas) {
     const sesiones = await this.prisma.cajaSesion.findMany({
       where: { estado: 'CERRADA', fechaCierre: { gte: desde, lte: hasta } },

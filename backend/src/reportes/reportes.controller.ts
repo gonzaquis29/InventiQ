@@ -34,4 +34,9 @@ export class ReportesController {
   cierresCaja(@Query('desde') desde?: string, @Query('hasta') hasta?: string) {
     return this.reportesService.cierresCaja(this.rango(desde, hasta));
   }
+
+  @Get('inventario')
+  valorizacionInventario(@Query('limit') limit?: string) {
+    return this.reportesService.valorizacionInventario(limit ? Number(limit) : 10);
+  }
 }

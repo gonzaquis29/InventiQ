@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { DollarSign, TrendingUp, CreditCard, Users } from 'lucide-react';
+import { DollarSign, TrendingUp, CreditCard, Users, Warehouse, PackageX, AlertTriangle } from 'lucide-react';
 import { api } from '@/lib/api';
 import { formatMoney } from '@/lib/format';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -35,6 +35,16 @@ interface CierreCaja {
   diferencia: number;
 }
 
+interface ValorizacionInventario {
+  totalProductos: number;
+  totalUnidades: number;
+  valorCosto: number;
+  valorVenta: number;
+  gananciaPotencial: number;
+  productosStockBajo: number;
+  topProductos: { id: string; nombre: string; stock: number; valorCosto: number; valorVenta: number }[];
+}
+
 const METODO_LABEL: Record<string, string> = {
   EFECTIVO: 'Efectivo',
   TARJETA: 'Tarjeta',
@@ -56,6 +66,7 @@ export default function Reportes() {
   const [masVendidos, setMasVendidos] = useState<ProductoVendido[]>([]);
   const [ganancias, setGanancias] = useState<Ganancias | null>(null);
   const [cierres, setCierres] = useState<CierreCaja[]>([]);
+  const [inventario, setInventario] = useState<ValorizacionInventario | null>(null);
 
   useEffect(() => {
     const params = { desde: new Date(desde).toISOString(), hasta: new Date(`${hasta}T23:59:59`).toISOString() };
@@ -64,6 +75,11 @@ export default function Reportes() {
     api.get<Ganancias>('/reportes/ganancias', { params }).then((res) => setGanancias(res.data));
     api.get<CierreCaja[]>('/reportes/caja', { params }).then((res) => setCierres(res.data));
   }, [desde, hasta]);
+
+  useEffect(() => {
+    // Foto del inventario actual — no depende del rango de fechas de arriba.
+    api.get<ValorizacionInventario>('/reportes/inventario').then((res) => setInventario(res.data));
+  }, []);
 
   return (
     <div>
@@ -81,6 +97,99 @@ export default function Reportes() {
         </div>
       </div>
 
+      <div className="mb-2 flex items-center gap-2">
+        <Warehouse size={16} className="text-ink-400" />
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-500">Inventario actual</h2>
+      </div>
+      <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <Card>
+          <CardContent className="flex items-center gap-3.5">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-ink-100 text-ink-700">
+              <Warehouse size={20} />
+            </div>
+            <div>
+              <p className="text-xs font-medium uppercase tracking-wide text-ink-500">Valorizado (costo)</p>
+              <p className="text-2xl font-semibold text-ink-900">{formatMoney(inventario?.valorCosto ?? 0)}</p>
+              <p className="text-xs text-ink-500">{inventario?.totalProductos ?? 0} productos · {inventario?.totalUnidades ?? 0} unid.</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="flex items-center gap-3.5">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-brand-100 text-brand-700">
+              <DollarSign size={20} />
+            </div>
+            <div>
+              <p className="text-xs font-medium uppercase tracking-wide text-ink-500">Valorizado (venta)</p>
+              <p className="text-2xl font-semibold text-ink-900">{formatMoney(inventario?.valorVenta ?? 0)}</p>
+              <p className="text-xs text-ink-500">si se vende todo el stock</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="flex items-center gap-3.5">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-emerald-bg text-emerald-600">
+              <TrendingUp size={20} />
+            </div>
+            <div>
+              <p className="text-xs font-medium uppercase tracking-wide text-ink-500">Ganancia potencial</p>
+              <p className="text-2xl font-semibold text-emerald-600">{formatMoney(inventario?.gananciaPotencial ?? 0)}</p>
+              <p className="text-xs text-ink-500">venta − costo</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className={inventario && inventario.productosStockBajo > 0 ? 'border-amber-warn bg-amber-warn-bg' : undefined}>
+          <CardContent className="flex items-center gap-3.5">
+            <div
+              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ${
+                inventario && inventario.productosStockBajo > 0 ? 'bg-white/60 text-amber-warn' : 'bg-ink-100 text-ink-700'
+              }`}
+            >
+              <AlertTriangle size={20} />
+            </div>
+            <div>
+              <p className={`text-xs font-medium uppercase tracking-wide ${inventario && inventario.productosStockBajo > 0 ? 'text-amber-warn' : 'text-ink-500'}`}>
+                Stock bajo
+              </p>
+              <p className={`text-2xl font-semibold ${inventario && inventario.productosStockBajo > 0 ? 'text-amber-warn' : 'text-ink-900'}`}>
+                {inventario?.productosStockBajo ?? 0}
+              </p>
+              <p className="text-xs text-ink-500">productos por reponer</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {inventario && inventario.topProductos.length > 0 && (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <PackageX size={16} />
+              Productos con más capital invertido
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <ul className="divide-y divide-ink-100">
+              {inventario.topProductos.map((p) => (
+                <li key={p.id} className="flex items-center justify-between px-5 py-3 text-sm">
+                  <div>
+                    <p className="font-medium text-ink-900">{p.nombre}</p>
+                    <p className="text-xs text-ink-500">{p.stock} unid. en stock</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-display font-bold text-ink-900">{formatMoney(p.valorCosto)}</p>
+                    <p className="text-xs text-ink-400">venta: {formatMoney(p.valorVenta)}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="mb-2 flex items-center gap-2">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-500">Ventas del período</h2>
+      </div>
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card>
           <CardContent className="flex items-center gap-3.5">
