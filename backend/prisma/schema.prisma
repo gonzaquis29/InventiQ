@@ -1,0 +1,266 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Rol {
+  ADMIN
+  VENDEDOR
+}
+
+enum MetodoPago {
+  EFECTIVO
+  TARJETA
+  YAPE_PLIN
+  MIXTO
+}
+
+enum TipoMovimientoStock {
+  VENTA
+  COMPRA
+  AJUSTE
+  ANULACION_VENTA
+}
+
+enum TipoMovimientoCaja {
+  VENTA
+  RETIRO
+  INGRESO
+  APERTURA
+}
+
+enum EstadoCaja {
+  ABIERTA
+  CERRADA
+}
+
+model Usuario {
+  id           String   @id @default(uuid())
+  nombre       String
+  email        String   @unique
+  passwordHash String
+  rol          Rol      @default(VENDEDOR)
+  activo       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  ventas           Venta[]
+  compras          Compra[]
+  movimientosStock MovimientoStock[]
+  sesionesCaja     CajaSesion[]
+
+  @@map("usuarios")
+}
+
+model Categoria {
+  id        String     @id @default(uuid())
+  nombre    String     @unique
+  productos Producto[]
+
+  @@map("categorias")
+}
+
+// Catálogo de marcas conocidas — no es FK de Producto.marca (ese campo sigue siendo texto libre
+// para no complicar la carga rápida de productos), solo alimenta el autocompletado y se gestiona
+// desde Configuración. Se auto-registra cada vez que se guarda un producto con una marca nueva.
+model Marca {
+  id        String   @id @default(uuid())
+  nombre    String   @unique
+  createdAt DateTime @default(now())
+
+  @@map("marcas")
+}
+
+// Catálogo de unidades de compra reutilizables (ej. "docena" = 12, "millar" = 1000). `factor` es
+// opcional: para unidades sin equivalencia fija (ej. "caja", que varía según el producto) queda
+// en null y el usuario ingresa la cantidad real en cada compra. No es FK de Producto — es solo
+// una lista de sugerencias configurable, reemplaza lo que antes era una lista fija en el código.
+model UnidadMedida {
+  id        String   @id @default(uuid())
+  nombre    String   @unique
+  factor    Int?
+  createdAt DateTime @default(now())
+
+  @@map("unidades_medida")
+}
+
+model Producto {
+  id             String     @id @default(uuid())
+  nombre         String
+  marca          String?
+  codigoBarras   String?    @unique
+  categoriaId    String?
+  categoria      Categoria? @relation(fields: [categoriaId], references: [id])
+  precioCompra   Decimal    @default(0) @db.Decimal(10, 2)
+  precioVenta    Decimal    @db.Decimal(10, 2)
+  margenGanancia Decimal?   @db.Decimal(6, 2)
+  // Unidad "estándar": todo el stock, costos y reportes se llevan internamente en esta unidad
+  // (ej. "hoja"). Elegirla como la más pequeña en la que se podría llegar a vender evita
+  // fracciones — ver `UnidadProducto` para las unidades alternativas de compra/venta.
+  unidad         String     @default("unidad")
+  stock          Int        @default(0)
+  stockMinimo    Int        @default(5)
+  activo         Boolean    @default(true)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  movimientosStock MovimientoStock[]
+  detallesVenta    DetalleVenta[]
+  detallesCompra   DetalleCompra[]
+  unidadesAlternativas UnidadProducto[]
+
+  @@index([nombre])
+  @@index([marca])
+  @@map("productos")
+}
+
+model MovimientoStock {
+  id         String              @id @default(uuid())
+  productoId String
+  producto   Producto            @relation(fields: [productoId], references: [id])
+  tipo       TipoMovimientoStock
+  cantidad   Int
+  motivo     String?
+  usuarioId  String
+  usuario    Usuario             @relation(fields: [usuarioId], references: [id])
+  createdAt  DateTime            @default(now())
+
+  @@map("movimientos_stock")
+}
+
+model Proveedor {
+  id        String   @id @default(uuid())
+  nombre    String
+  contacto  String?
+  ruc       String?
+  activo    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  compras Compra[]
+
+  @@map("proveedores")
+}
+
+model Compra {
+  id          String    @id @default(uuid())
+  proveedorId String
+  proveedor   Proveedor @relation(fields: [proveedorId], references: [id])
+  usuarioId   String
+  usuario     Usuario   @relation(fields: [usuarioId], references: [id])
+  total       Decimal   @db.Decimal(10, 2)
+  createdAt   DateTime  @default(now())
+
+  detalles DetalleCompra[]
+
+  @@map("compras")
+}
+
+model DetalleCompra {
+  id         String   @id @default(uuid())
+  compraId   String
+  compra     Compra   @relation(fields: [compraId], references: [id], onDelete: Cascade)
+  productoId String
+  producto   Producto @relation(fields: [productoId], references: [id])
+
+  // Cómo se registró la compra (ej. "5 docenas a S/30 la docena")
+  unidadCompra        String  @default("unidad")
+  factorUnidad        Int     @default(1)
+  cantidadComprada    Int
+  costoUnitarioCompra Decimal @db.Decimal(10, 2)
+
+  // Normalizado a unidades de venta (lo que impacta el stock del producto)
+  cantidad      Int
+  costoUnitario Decimal @db.Decimal(10, 2)
+
+  @@map("detalles_compra")
+}
+
+model Venta {
+  id              String      @id @default(uuid())
+  usuarioId       String
+  usuario         Usuario     @relation(fields: [usuarioId], references: [id])
+  cajaSesionId    String?
+  cajaSesion      CajaSesion? @relation(fields: [cajaSesionId], references: [id])
+  total           Decimal     @db.Decimal(10, 2)
+  metodoPago      MetodoPago
+  montoEfectivo   Decimal     @default(0) @db.Decimal(10, 2)
+  montoDigital    Decimal     @default(0) @db.Decimal(10, 2)
+  anulada         Boolean     @default(false)
+  motivoAnulacion String?
+  createdAt       DateTime    @default(now())
+
+  detalles        DetalleVenta[]
+  movimientosCaja MovimientoCaja[]
+
+  @@map("ventas")
+}
+
+model DetalleVenta {
+  id             String   @id @default(uuid())
+  ventaId        String
+  venta          Venta    @relation(fields: [ventaId], references: [id], onDelete: Cascade)
+  productoId     String
+  producto       Producto @relation(fields: [productoId], references: [id])
+  // Siempre normalizados a la unidad ESTÁNDAR del producto (para que stock/ganancias/reportes
+  // no tengan que saber nada de unidades alternativas). `unidadVendida`/`factorUnidad` son solo
+  // metadata descriptiva de cómo se vendió en realidad (ej. "1 paquete" en vez de "10 hoja"),
+  // capturada al momento de la venta para que el historial no cambie si luego se edita el producto.
+  cantidad       Int
+  precioUnitario Decimal  @db.Decimal(10, 2)
+  descuento      Decimal  @default(0) @db.Decimal(10, 2)
+  unidadVendida  String   @default("unidad")
+  factorUnidad   Decimal  @default(1) @db.Decimal(12, 3)
+
+  @@map("detalles_venta")
+}
+
+// Unidades alternativas de compra/venta de un producto (ej. "paquete" = 10, "millar" = 1000),
+// relativas a `Producto.unidad` (la unidad estándar, factor implícito 1). No son globales:
+// cada producto define las suyas. `UnidadMedida` (catálogo global) solo sirve para sugerir
+// nombre + factor típico al agregar una nueva unidad, no reemplaza esta tabla.
+model UnidadProducto {
+  id         String   @id @default(uuid())
+  productoId String
+  producto   Producto @relation(fields: [productoId], references: [id], onDelete: Cascade)
+  nombre     String
+  factor     Decimal  @db.Decimal(12, 3)
+
+  @@unique([productoId, nombre])
+  @@map("unidades_producto")
+}
+
+model CajaSesion {
+  id            String     @id @default(uuid())
+  usuarioId     String
+  usuario       Usuario    @relation(fields: [usuarioId], references: [id])
+  fechaApertura DateTime   @default(now())
+  montoApertura Decimal    @db.Decimal(10, 2)
+  fechaCierre   DateTime?
+  montoContado  Decimal?   @db.Decimal(10, 2)
+  montoEsperado Decimal?   @db.Decimal(10, 2)
+  diferencia    Decimal?   @db.Decimal(10, 2)
+  estado        EstadoCaja @default(ABIERTA)
+
+  ventas          Venta[]
+  movimientosCaja MovimientoCaja[]
+
+  @@map("caja_sesiones")
+}
+
+model MovimientoCaja {
+  id           String             @id @default(uuid())
+  cajaSesionId String
+  cajaSesion   CajaSesion         @relation(fields: [cajaSesionId], references: [id])
+  ventaId      String?
+  venta        Venta?             @relation(fields: [ventaId], references: [id])
+  tipo         TipoMovimientoCaja
+  monto        Decimal            @db.Decimal(10, 2)
+  motivo       String?
+  createdAt    DateTime           @default(now())
+
+  @@map("movimientos_caja")
+}

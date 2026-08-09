@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Environment variables (never commit secrets)
+.env
+.env.local
+backend/.devdb/
+
+# Internal planning docs / business data — not part of the shipped source
+REQUISITOS.md
+Inventario.xlsx - Inventario.csv
+docs/
+.superpowers/
+
+# Prisma migration history — regenerate locally instead of tracking it (see README)
+backend/prisma/migrations/
+
+# Seed script (has demo login credentials) — keep local-only
+backend/prisma/seed.ts
+
+# OS / editor
+.DS_Store
