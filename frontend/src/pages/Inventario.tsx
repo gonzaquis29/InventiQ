@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Search, Plus, Pencil, PackagePlus, ChevronLeft, ChevronRight, Upload } from 'lucide-react';
 import { api } from '@/lib/api';
 import { formatMoney } from '@/lib/format';
@@ -36,13 +36,14 @@ function esProductoNuevo(p: Producto): boolean {
 export default function Inventario() {
   const { usuario } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const esAdmin = usuario?.rol === 'ADMIN';
 
   const [resultado, setResultado] = useState<Paginated<Producto> | null>(null);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [q, setQ] = useState('');
   const [categoriaId, setCategoriaId] = useState('');
-  const [soloStockBajo, setSoloStockBajo] = useState(false);
+  const [soloStockBajo, setSoloStockBajo] = useState(searchParams.get('stockBajo') === 'true');
   const [soloNuevos, setSoloNuevos] = useState(false);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);

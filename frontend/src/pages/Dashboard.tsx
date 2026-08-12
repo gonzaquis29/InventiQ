@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/Badge';
 import { useAuth } from '@/context/AuthContext';
 import type { CajaSesion, Producto, Venta } from '@/types';
 
+const LIMITE_STOCK_BAJO = 5;
+
 export default function Dashboard() {
   const { usuario } = useAuth();
   const [stockBajo, setStockBajo] = useState<Producto[]>([]);
@@ -99,19 +101,29 @@ export default function Dashboard() {
               {loading ? 'Cargando…' : 'No hay productos con stock bajo por ahora.'}
             </p>
           ) : (
-            <ul className="divide-y divide-ink-100">
-              {stockBajo.map((p) => (
-                <li key={p.id} className="flex items-center justify-between px-5 py-3">
-                  <div className="flex items-center gap-3">
-                    <AlertTriangle size={16} className="text-amber-warn" />
-                    <span className="text-sm font-medium text-ink-900">{p.nombre}</span>
-                  </div>
-                  <Badge variant="warn">
-                    {p.stock} / mín. {p.stockMinimo}
-                  </Badge>
-                </li>
-              ))}
-            </ul>
+            <>
+              <ul className="divide-y divide-ink-100">
+                {stockBajo.slice(0, LIMITE_STOCK_BAJO).map((p) => (
+                  <li key={p.id} className="flex items-center justify-between px-5 py-3">
+                    <div className="flex items-center gap-3">
+                      <AlertTriangle size={16} className="text-amber-warn" />
+                      <span className="text-sm font-medium text-ink-900">{p.nombre}</span>
+                    </div>
+                    <Badge variant="warn">
+                      {p.stock} / mín. {p.stockMinimo}
+                    </Badge>
+                  </li>
+                ))}
+              </ul>
+              {stockBajo.length > LIMITE_STOCK_BAJO && (
+                <Link
+                  to="/inventario?stockBajo=true"
+                  className="block border-t border-ink-100 px-5 py-3 text-center text-sm font-medium text-brand-600 hover:bg-ink-50 hover:underline"
+                >
+                  Ver los {stockBajo.length - LIMITE_STOCK_BAJO} restantes
+                </Link>
+              )}
+            </>
           )}
         </CardContent>
       </Card>
