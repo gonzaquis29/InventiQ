@@ -31,11 +31,32 @@ export class ReportesService {
       porVendedor[key].cantidad += 1;
     }
 
+    const porDiaMap = new Map<string, number>();
+    for (const v of ventas) {
+      const key = v.createdAt.toISOString().slice(0, 10);
+      porDiaMap.set(key, (porDiaMap.get(key) ?? 0) + Number(v.total));
+    }
+    const porDia: { fecha: string; total: number }[] = [];
+    if (desde && hasta) {
+      const cursor = new Date(Date.UTC(desde.getUTCFullYear(), desde.getUTCMonth(), desde.getUTCDate()));
+      const fin = new Date(Date.UTC(hasta.getUTCFullYear(), hasta.getUTCMonth(), hasta.getUTCDate()));
+      while (cursor <= fin) {
+        const key = cursor.toISOString().slice(0, 10);
+        porDia.push({ fecha: key, total: porDiaMap.get(key) ?? 0 });
+        cursor.setUTCDate(cursor.getUTCDate() + 1);
+      }
+    } else {
+      porDia.push(
+        ...[...porDiaMap.entries()].map(([fecha, total]) => ({ fecha, total })).sort((a, b) => a.fecha.localeCompare(b.fecha)),
+      );
+    }
+
     return {
       cantidadVentas: ventas.length,
       totalVentas,
       porMetodoPago,
       porVendedor: Object.values(porVendedor),
+      porDia,
     };
   }
 
