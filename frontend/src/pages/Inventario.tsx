@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/Badge';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { ImportarProductosModal } from '@/components/inventario/ImportarProductosModal';
 import { AjustarStockModal } from '@/components/inventario/AjustarStockModal';
-import type { Categoria, Paginated, Producto } from '@/types';
+import type { Categoria, Marca, Paginated, Producto } from '@/types';
 
 const PAGE_SIZE = 10;
 
@@ -41,8 +41,10 @@ export default function Inventario() {
 
   const [resultado, setResultado] = useState<Paginated<Producto> | null>(null);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [marcas, setMarcas] = useState<Marca[]>([]);
   const [q, setQ] = useState('');
   const [categoriaId, setCategoriaId] = useState('');
+  const [marca, setMarca] = useState('');
   const [soloStockBajo, setSoloStockBajo] = useState(searchParams.get('stockBajo') === 'true');
   const [soloNuevos, setSoloNuevos] = useState(false);
   const [page, setPage] = useState(1);
@@ -58,6 +60,7 @@ export default function Inventario() {
         params: {
           q: q || undefined,
           categoriaId: categoriaId || undefined,
+          marca: marca || undefined,
           stockBajo: soloStockBajo || undefined,
           nuevos: soloNuevos || undefined,
           page,
@@ -70,17 +73,18 @@ export default function Inventario() {
 
   useEffect(() => {
     api.get<Categoria[]>('/categorias').then((res) => setCategorias(res.data));
+    api.get<Marca[]>('/marcas').then((res) => setMarcas(res.data));
   }, []);
 
   useEffect(() => {
     const timeout = setTimeout(cargarProductos, 250);
     return () => clearTimeout(timeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [q, categoriaId, soloStockBajo, soloNuevos, page]);
+  }, [q, categoriaId, marca, soloStockBajo, soloNuevos, page]);
 
   useEffect(() => {
     setPage(1);
-  }, [q, categoriaId, soloStockBajo, soloNuevos]);
+  }, [q, categoriaId, marca, soloStockBajo, soloNuevos]);
 
   const totalPaginas = useMemo(() => (resultado ? Math.max(Math.ceil(resultado.total / PAGE_SIZE), 1) : 1), [resultado]);
   const productos = resultado?.data ?? [];
@@ -118,6 +122,15 @@ export default function Inventario() {
             onChange={(value) => setCategoriaId(value)}
             options={categorias.map((c) => ({ value: c.id, label: c.nombre }))}
             placeholder="Todas las categorías"
+          />
+        </div>
+        <div className="w-52">
+          <SearchableSelect
+            value={marca}
+            displayValue={marca}
+            onChange={(value) => setMarca(value)}
+            options={marcas.map((m) => ({ value: m.nombre, label: m.nombre }))}
+            placeholder="Todas las marcas"
           />
         </div>
         <button

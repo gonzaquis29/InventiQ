@@ -13,10 +13,19 @@ interface FindAllParams {
   q?: string;
   soloActivos?: boolean;
   categoriaId?: string;
+  marca?: string;
   stockBajo?: boolean;
   nuevos?: boolean;
   page?: number;
   pageSize?: number;
+}
+
+/** Quita tildes/diéresis para que "lapiz" encuentre "Lápiz" (búsqueda insensible a acentos). */
+function normalizarTexto(texto: string): string {
+  return texto
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase();
 }
 
 @Injectable()
@@ -30,23 +39,37 @@ export class ProductosService {
     if (marca?.trim()) this.marcasService.create(marca.trim()).catch(() => undefined);
   }
 
+  /** Ids de productos que matchean TODAS las palabras de `q` en nombre/marca/código, sin importar
+   * tildes ni orden (ej. "faber lapiz" encuentra "Lápiz Faber Castell"). */
+  private async buscarIdsPorTexto(q: string): Promise<string[]> {
+    const terminos = normalizarTexto(q).split(/\s+/).filter(Boolean);
+    if (terminos.length === 0) return [];
+
+    const condiciones = terminos.map(
+      (t) => Prisma.sql`
+        translate(
+          lower(coalesce(nombre, '') || ' ' || coalesce(marca, '') || ' ' || coalesce("codigoBarras", '')),
+          'áéíóúüñ', 'aeiouun'
+        ) LIKE ${'%' + t + '%'}
+      `,
+    );
+    const rows = await this.prisma.$queryRaw<{ id: string }[]>`
+      SELECT id FROM productos WHERE ${Prisma.join(condiciones, ' AND ')}
+    `;
+    return rows.map((r) => r.id);
+  }
+
   async findAll(params: FindAllParams) {
     const page = Math.max(params.page ?? 1, 1);
     const pageSize = Math.min(Math.max(params.pageSize ?? 20, 1), 100);
+    const idsPorTexto = params.q ? await this.buscarIdsPorTexto(params.q) : null;
 
     const where: Prisma.ProductoWhereInput = {
       activo: params.soloActivos ? true : undefined,
       categoriaId: params.categoriaId || undefined,
+      marca: params.marca ? { equals: params.marca, mode: 'insensitive' } : undefined,
       createdAt: params.nuevos ? { gte: new Date(Date.now() - DIAS_PRODUCTO_NUEVO * 24 * 60 * 60 * 1000) } : undefined,
-      ...(params.q
-        ? {
-            OR: [
-              { nombre: { contains: params.q, mode: 'insensitive' } },
-              { marca: { contains: params.q, mode: 'insensitive' } },
-              { codigoBarras: { contains: params.q, mode: 'insensitive' } },
-            ],
-          }
-        : {}),
+      id: idsPorTexto ? { in: idsPorTexto } : undefined,
     };
 
     if (params.stockBajo) {
@@ -55,6 +78,8 @@ export class ProductosService {
           SELECT id FROM productos
           WHERE activo = true AND stock <= "stockMinimo"
           ${params.categoriaId ? Prisma.sql`AND "categoriaId" = ${params.categoriaId}` : Prisma.empty}
+          ${params.marca ? Prisma.sql`AND marca ILIKE ${params.marca}` : Prisma.empty}
+          ${idsPorTexto ? Prisma.sql`AND id = ANY(${idsPorTexto})` : Prisma.empty}
           ORDER BY stock ASC
           LIMIT ${pageSize} OFFSET ${(page - 1) * pageSize}
         `,
@@ -62,6 +87,8 @@ export class ProductosService {
           SELECT COUNT(*) as count FROM productos
           WHERE activo = true AND stock <= "stockMinimo"
           ${params.categoriaId ? Prisma.sql`AND "categoriaId" = ${params.categoriaId}` : Prisma.empty}
+          ${params.marca ? Prisma.sql`AND marca ILIKE ${params.marca}` : Prisma.empty}
+          ${idsPorTexto ? Prisma.sql`AND id = ANY(${idsPorTexto})` : Prisma.empty}
         `,
       ]);
       const data = await this.prisma.producto.findMany({
