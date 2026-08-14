@@ -13,6 +13,7 @@ backend/.devdb/
 # Internal planning docs / business data — not part of the shipped source
 REQUISITOS.md
 Inventario.xlsx - Inventario.csv
+Inventario-limpio.csv
 docs/
 .superpowers/
 
