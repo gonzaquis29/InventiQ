@@ -158,12 +158,12 @@ export default function Inventario() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-ink-100 text-left text-xs font-medium uppercase tracking-wide text-ink-500">
-                  <th className="px-5 py-3">Producto</th>
-                  <th className="px-5 py-3">Categoría</th>
-                  <th className="px-5 py-3">Precio venta</th>
-                  <th className="px-5 py-3">Margen</th>
-                  <th className="px-5 py-3">Stock</th>
-                  {esAdmin && <th className="px-5 py-3 text-right">Acciones</th>}
+                  <th className="px-6 py-4">Producto</th>
+                  <th className="px-6 py-4">Categoría</th>
+                  <th className="px-6 py-4">Precio venta</th>
+                  <th className="px-6 py-4">Margen</th>
+                  <th className="px-6 py-4">Stock</th>
+                  {esAdmin && <th className="px-6 py-4 text-right">Acciones</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-ink-100">
@@ -171,7 +171,7 @@ export default function Inventario() {
                   const margen = p.margenGanancia ?? calcularMargen(p.precioCompra, p.precioVenta);
                   return (
                     <tr key={p.id} className="cursor-pointer hover:bg-ink-50" onClick={() => navigate(`/inventario/${p.id}`)}>
-                      <td className="px-5 py-3">
+                      <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
                           <p className="font-medium text-ink-900">{p.nombre}</p>
                           {esProductoNuevo(p) && p.createdAt && (
@@ -182,12 +182,12 @@ export default function Inventario() {
                         </div>
                         <p className="text-xs text-ink-400">{[p.marca, p.codigoBarras].filter(Boolean).join(' · ') || '—'}</p>
                       </td>
-                      <td className="px-5 py-3 text-ink-600">{p.categoria?.nombre ?? '—'}</td>
-                      <td className="px-5 py-3 text-ink-900">{formatMoney(p.precioVenta)}</td>
-                      <td className="px-5 py-3">
+                      <td className="px-6 py-4 text-ink-600">{p.categoria?.nombre ?? '—'}</td>
+                      <td className="px-6 py-4 text-ink-900">{formatMoney(p.precioVenta)}</td>
+                      <td className="px-6 py-4">
                         {margen ? <span className="text-emerald-600 font-medium">+{margen}%</span> : <span className="text-ink-400">—</span>}
                       </td>
-                      <td className="px-5 py-3">
+                      <td className="px-6 py-4">
                         {p.stock <= p.stockMinimo ? (
                           <Badge variant="warn">
                             {p.stock} {p.unidad}
@@ -199,7 +199,7 @@ export default function Inventario() {
                         )}
                       </td>
                       {esAdmin && (
-                        <td className="px-5 py-3" onClick={(e) => e.stopPropagation()}>
+                        <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
                           <div className="flex justify-end gap-1">
                             <Button variant="ghost" size="sm" onClick={() => setAjusteProducto(p)} title="Ajustar stock">
                               <PackagePlus size={16} />
@@ -225,7 +225,7 @@ export default function Inventario() {
           </div>
 
           {resultado && resultado.total > PAGE_SIZE && (
-            <div className="flex items-center justify-between border-t border-ink-100 px-5 py-3">
+            <div className="flex items-center justify-between border-t border-ink-100 px-6 py-4">
               <p className="text-xs text-ink-500">
                 Página {page} de {totalPaginas}
               </p>

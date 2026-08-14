@@ -134,12 +134,12 @@ export default function Caja() {
             </CardHeader>
             <CardContent className="p-0">
               <ul className="divide-y divide-ink-100">
-                <li className="flex items-center justify-between px-5 py-3 text-sm">
+                <li className="flex items-center justify-between px-6 py-4 text-sm">
                   <span className="text-ink-600">Monto de apertura</span>
                   <span className="font-medium text-ink-900">{formatMoney(cajaActual.montoApertura)}</span>
                 </li>
                 {(cajaActual.movimientosCaja ?? []).map((m) => (
-                  <li key={m.id} className="flex items-center justify-between px-5 py-3 text-sm">
+                  <li key={m.id} className="flex items-center justify-between px-6 py-4 text-sm">
                     <div className="flex items-center gap-2">
                       {m.tipo === 'RETIRO' ? (
                         <ArrowDownCircle size={16} className="text-red-danger" />
@@ -190,11 +190,11 @@ export default function Caja() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-ink-100 text-left text-xs font-medium uppercase tracking-wide text-ink-500">
-                  <th className="px-5 py-3">Apertura</th>
-                  <th className="px-5 py-3">Cierre</th>
-                  <th className="px-5 py-3">Esperado</th>
-                  <th className="px-5 py-3">Contado</th>
-                  <th className="px-5 py-3">Diferencia</th>
+                  <th className="px-6 py-4">Apertura</th>
+                  <th className="px-6 py-4">Cierre</th>
+                  <th className="px-6 py-4">Esperado</th>
+                  <th className="px-6 py-4">Contado</th>
+                  <th className="px-6 py-4">Diferencia</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-ink-100">
@@ -202,11 +202,11 @@ export default function Caja() {
                   .filter((s) => s.estado === 'CERRADA')
                   .map((s) => (
                     <tr key={s.id}>
-                      <td className="px-5 py-3 text-ink-600">{formatDateTime(s.fechaApertura)}</td>
-                      <td className="px-5 py-3 text-ink-600">{s.fechaCierre ? formatDateTime(s.fechaCierre) : '—'}</td>
-                      <td className="px-5 py-3">{formatMoney(s.montoEsperado ?? 0)}</td>
-                      <td className="px-5 py-3">{formatMoney(s.montoContado ?? 0)}</td>
-                      <td className="px-5 py-3">
+                      <td className="px-6 py-4 text-ink-600">{formatDateTime(s.fechaApertura)}</td>
+                      <td className="px-6 py-4 text-ink-600">{s.fechaCierre ? formatDateTime(s.fechaCierre) : '—'}</td>
+                      <td className="px-6 py-4">{formatMoney(s.montoEsperado ?? 0)}</td>
+                      <td className="px-6 py-4">{formatMoney(s.montoContado ?? 0)}</td>
+                      <td className="px-6 py-4">
                         <Badge variant={Number(s.diferencia) === 0 ? 'brand' : Number(s.diferencia) < 0 ? 'danger' : 'warn'}>
                           {formatMoney(s.diferencia ?? 0)}
                         </Badge>

@@ -192,21 +192,21 @@ export default function Compras() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-ink-100 text-left text-xs font-medium uppercase tracking-wide text-ink-500">
-                  <th className="px-5 py-3">Fecha</th>
-                  <th className="px-5 py-3">Proveedor</th>
-                  <th className="px-5 py-3">Productos</th>
-                  <th className="px-5 py-3">Registrado por</th>
-                  <th className="px-5 py-3 text-right">Total</th>
+                  <th className="px-6 py-4">Fecha</th>
+                  <th className="px-6 py-4">Proveedor</th>
+                  <th className="px-6 py-4">Productos</th>
+                  <th className="px-6 py-4">Registrado por</th>
+                  <th className="px-6 py-4 text-right">Total</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-ink-100">
                 {compras.map((c) => (
                   <tr key={c.id} className="cursor-pointer hover:bg-ink-50" onClick={() => navigate(`/compras/${c.id}`)}>
-                    <td className="px-5 py-3 text-ink-600">{formatDateTime(c.createdAt)}</td>
-                    <td className="px-5 py-3 font-medium text-ink-900">{c.proveedor.nombre}</td>
-                    <td className="px-5 py-3 text-ink-600">{c.detalles.length} ítems</td>
-                    <td className="px-5 py-3 text-ink-600">{c.usuario.nombre}</td>
-                    <td className="px-5 py-3 text-right font-medium text-ink-900">{formatMoney(c.total)}</td>
+                    <td className="px-6 py-4 text-ink-600">{formatDateTime(c.createdAt)}</td>
+                    <td className="px-6 py-4 font-medium text-ink-900">{c.proveedor.nombre}</td>
+                    <td className="px-6 py-4 text-ink-600">{c.detalles.length} ítems</td>
+                    <td className="px-6 py-4 text-ink-600">{c.usuario.nombre}</td>
+                    <td className="px-6 py-4 text-right font-medium text-ink-900">{formatMoney(c.total)}</td>
                   </tr>
                 ))}
                 {!loading && compras.length === 0 && (

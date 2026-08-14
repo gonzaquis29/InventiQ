@@ -124,7 +124,7 @@ export default function VentaDetalle() {
           <CardContent className="p-0">
             <ul className="divide-y divide-ink-100">
               {venta.detalles.map((d) => (
-                <li key={d.id} className="flex items-center justify-between px-5 py-3 text-sm">
+                <li key={d.id} className="flex items-center justify-between px-6 py-4 text-sm">
                   <div>
                     <p className="font-medium text-ink-900">{d.producto.nombre}</p>
                     <p className="text-xs text-ink-400">

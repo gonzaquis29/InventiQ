@@ -378,7 +378,7 @@ export default function ProductoDetalle() {
                       {compras.map((c) => {
                         const linea = c.detalles.find((d) => d.productoId === producto.id);
                         return (
-                          <li key={c.id} className="px-5 py-3 text-sm">
+                          <li key={c.id} className="px-6 py-4 text-sm">
                             <div className="flex items-center justify-between">
                               <span className="font-medium text-ink-900">{c.proveedor.nombre}</span>
                               <span className="text-ink-500">{formatDateTime(c.createdAt)}</span>
@@ -409,7 +409,7 @@ export default function ProductoDetalle() {
                   ) : (
                     <ul className="max-h-72 divide-y divide-ink-100 overflow-y-auto">
                       {movimientos.map((m) => (
-                        <li key={m.id} className="flex items-center justify-between px-5 py-3 text-sm">
+                        <li key={m.id} className="flex items-center justify-between px-6 py-4 text-sm">
                           <div>
                             <p className="text-ink-800">{m.motivo ?? m.tipo}</p>
                             <p className="text-xs text-ink-400">

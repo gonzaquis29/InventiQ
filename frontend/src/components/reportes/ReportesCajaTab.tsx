@@ -52,21 +52,21 @@ export function ReportesCajaTab({ cierres }: { cierres: CierreCaja[] }) {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-ink-100 text-left text-xs font-medium uppercase tracking-wide text-ink-500">
-                  <th className="px-5 py-3">Fecha de cierre</th>
-                  <th className="px-5 py-3">Usuario</th>
-                  <th className="px-5 py-3">Esperado</th>
-                  <th className="px-5 py-3">Contado</th>
-                  <th className="px-5 py-3">Diferencia</th>
+                  <th className="px-6 py-4">Fecha de cierre</th>
+                  <th className="px-6 py-4">Usuario</th>
+                  <th className="px-6 py-4">Esperado</th>
+                  <th className="px-6 py-4">Contado</th>
+                  <th className="px-6 py-4">Diferencia</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-ink-100">
                 {cierres.map((c) => (
                   <tr key={c.id}>
-                    <td className="px-5 py-3 text-ink-600">{new Date(c.fechaCierre).toLocaleString('es-PE')}</td>
-                    <td className="px-5 py-3 text-ink-600">{c.usuario}</td>
-                    <td className="px-5 py-3">{formatMoney(c.montoEsperado)}</td>
-                    <td className="px-5 py-3">{formatMoney(c.montoContado)}</td>
-                    <td className="px-5 py-3">
+                    <td className="px-6 py-4 text-ink-600">{new Date(c.fechaCierre).toLocaleString('es-PE')}</td>
+                    <td className="px-6 py-4 text-ink-600">{c.usuario}</td>
+                    <td className="px-6 py-4">{formatMoney(c.montoEsperado)}</td>
+                    <td className="px-6 py-4">{formatMoney(c.montoContado)}</td>
+                    <td className="px-6 py-4">
                       <Badge variant={c.diferencia === 0 ? 'brand' : c.diferencia < 0 ? 'danger' : 'warn'}>
                         {formatMoney(c.diferencia)}
                       </Badge>

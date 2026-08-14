@@ -132,23 +132,23 @@ export default function Proveedores() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-ink-100 text-left text-xs font-medium uppercase tracking-wide text-ink-500">
-                  <th className="px-5 py-3">Proveedor</th>
-                  <th className="px-5 py-3">Contacto</th>
-                  <th className="px-5 py-3">RUC</th>
-                  <th className="px-5 py-3">Estado</th>
-                  <th className="px-5 py-3 text-right">Acciones</th>
+                  <th className="px-6 py-4">Proveedor</th>
+                  <th className="px-6 py-4">Contacto</th>
+                  <th className="px-6 py-4">RUC</th>
+                  <th className="px-6 py-4">Estado</th>
+                  <th className="px-6 py-4 text-right">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-ink-100">
                 {proveedores.map((p) => (
                   <tr key={p.id} className="cursor-pointer hover:bg-ink-50" onClick={() => abrirDetalle(p)}>
-                    <td className="px-5 py-3 font-medium text-ink-900">{p.nombre}</td>
-                    <td className="px-5 py-3 text-ink-600">{p.contacto || '—'}</td>
-                    <td className="px-5 py-3 text-ink-600">{p.ruc || '—'}</td>
-                    <td className="px-5 py-3">
+                    <td className="px-6 py-4 font-medium text-ink-900">{p.nombre}</td>
+                    <td className="px-6 py-4 text-ink-600">{p.contacto || '—'}</td>
+                    <td className="px-6 py-4 text-ink-600">{p.ruc || '—'}</td>
+                    <td className="px-6 py-4">
                       {p.activo ? <Badge variant="positive">Activo</Badge> : <Badge variant="neutral">Inactivo</Badge>}
                     </td>
-                    <td className="px-5 py-3" onClick={(e) => e.stopPropagation()}>
+                    <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
                       <div className="flex justify-end gap-1">
                         <Button variant="ghost" size="sm" onClick={() => abrirEditar(p)} title="Editar">
                           <Pencil size={16} />

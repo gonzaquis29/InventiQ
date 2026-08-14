@@ -38,23 +38,23 @@ export default function Ventas() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-ink-100 text-left text-xs font-medium uppercase tracking-wide text-ink-500">
-                  <th className="px-5 py-3">Fecha</th>
-                  <th className="px-5 py-3">Vendedor</th>
-                  <th className="px-5 py-3">Método</th>
-                  <th className="px-5 py-3">Estado</th>
-                  <th className="px-5 py-3 text-right">Total</th>
+                  <th className="px-6 py-4">Fecha</th>
+                  <th className="px-6 py-4">Vendedor</th>
+                  <th className="px-6 py-4">Método</th>
+                  <th className="px-6 py-4">Estado</th>
+                  <th className="px-6 py-4 text-right">Total</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-ink-100">
                 {ventas.map((v) => (
                   <tr key={v.id} className="cursor-pointer hover:bg-ink-50" onClick={() => navigate(`/ventas/${v.id}`)}>
-                    <td className="px-5 py-3 text-ink-600">{formatDateTime(v.createdAt)}</td>
-                    <td className="px-5 py-3 text-ink-600">{v.usuario.nombre}</td>
-                    <td className="px-5 py-3 text-ink-600">{METODO_LABEL[v.metodoPago]}</td>
-                    <td className="px-5 py-3">
+                    <td className="px-6 py-4 text-ink-600">{formatDateTime(v.createdAt)}</td>
+                    <td className="px-6 py-4 text-ink-600">{v.usuario.nombre}</td>
+                    <td className="px-6 py-4 text-ink-600">{METODO_LABEL[v.metodoPago]}</td>
+                    <td className="px-6 py-4">
                       {v.anulada ? <Badge variant="danger">Anulada</Badge> : <Badge variant="positive">Completada</Badge>}
                     </td>
-                    <td className={`px-5 py-3 text-right font-medium ${v.anulada ? 'text-ink-400 line-through' : 'text-ink-900'}`}>
+                    <td className={`px-6 py-4 text-right font-medium ${v.anulada ? 'text-ink-400 line-through' : 'text-ink-900'}`}>
                       {formatMoney(v.total)}
                     </td>
                   </tr>
