@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
-import { ShoppingCart, Warehouse, Wallet } from 'lucide-react';
+import { Download, ShoppingCart, Warehouse, Wallet } from 'lucide-react';
 import { api } from '@/lib/api';
 import { Input, Label } from '@/components/ui/Input';
 import { cn } from '@/lib/cn';
+import { Button } from '@/components/ui/Button';
+import { exportarReporteCaja, exportarReporteInventario, exportarReporteVentas } from '@/lib/exportReportes';
 import { ReportesVentasTab } from '@/components/reportes/ReportesVentasTab';
 import { ReportesInventarioTab } from '@/components/reportes/ReportesInventarioTab';
 import { ReportesCajaTab } from '@/components/reportes/ReportesCajaTab';
@@ -46,12 +48,19 @@ export default function Reportes() {
     api.get<ValorizacionInventario>('/reportes/inventario').then((res) => setInventario(res.data));
   }, []);
 
+  const exportar = () => {
+    if (activa === 'ventas' && resumen) exportarReporteVentas(desde, hasta, resumen, masVendidos, ganancias);
+    if (activa === 'inventario' && inventario) exportarReporteInventario(inventario);
+    if (activa === 'caja') exportarReporteCaja(desde, hasta, cierres);
+  };
+
   return (
     <div>
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <h1 className="font-display text-2xl font-bold text-ink-900">Reportes</h1>
-        {tab.conFecha && (
-          <div className="flex items-end gap-3">
+        <div className="flex flex-wrap items-end gap-3">
+          {tab.conFecha && (
+            <>
             <div>
               <Label htmlFor="desde">Desde</Label>
               <Input id="desde" type="date" value={desde} onChange={(e) => setDesde(e.target.value)} />
@@ -60,8 +69,13 @@ export default function Reportes() {
               <Label htmlFor="hasta">Hasta</Label>
               <Input id="hasta" type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} />
             </div>
-          </div>
-        )}
+            </>
+          )}
+          <Button variant="outline" onClick={exportar}>
+            <Download size={16} />
+            Exportar CSV
+          </Button>
+        </div>
       </div>
 
       <div className="mb-6 flex gap-1 border-b border-ink-100">

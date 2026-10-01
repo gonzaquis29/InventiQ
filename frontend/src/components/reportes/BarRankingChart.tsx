@@ -28,7 +28,7 @@ export function BarRankingChart({
           <XAxis type="number" tick={{ fontSize: 12, fill: 'var(--color-ink-500)' }} />
           <YAxis type="category" dataKey="label" width={160} tick={{ fontSize: 12, fill: 'var(--color-ink-700)' }} />
           <Tooltip
-            formatter={(value: number) => [valueFormatter(value), tooltipLabel]}
+            formatter={(value) => [valueFormatter(Number(value)), tooltipLabel]}
             contentStyle={{ borderRadius: 8, borderColor: 'var(--color-ink-200)', fontSize: 13 }}
           />
           <Bar dataKey="value" fill={color} radius={[0, 4, 4, 0]} />

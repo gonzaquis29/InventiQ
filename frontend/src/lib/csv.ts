@@ -126,3 +126,22 @@ export function mapearColumnas(headerRow: string[]): Partial<Record<keyof typeof
   }
   return mapa;
 }
+
+type CeldaCsv = string | number;
+
+function escaparCelda(valor: CeldaCsv): string {
+  const s = String(valor);
+  return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+/** Descarga filas como CSV (UTF-8 con BOM para que Excel respete tildes). */
+export function descargarCsv(nombreArchivo: string, filas: CeldaCsv[][]) {
+  const contenido = filas.map((fila) => fila.map(escaparCelda).join(',')).join('\r\n');
+  const blob = new Blob(['﻿', contenido], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = nombreArchivo;
+  a.click();
+  URL.revokeObjectURL(url);
+}

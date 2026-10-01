@@ -26,8 +26,8 @@ export function TendenciaVentasChart({ data }: { data: PuntoVentaDia[] }) {
           <XAxis dataKey="fecha" tickFormatter={formatFechaCorta} tick={{ fontSize: 12, fill: 'var(--color-ink-500)' }} />
           <YAxis tick={{ fontSize: 12, fill: 'var(--color-ink-500)' }} width={56} tickFormatter={(v: number) => formatMoney(v)} />
           <Tooltip
-            labelFormatter={formatFechaCorta}
-            formatter={(value: number) => [formatMoney(value), 'Vendido']}
+            labelFormatter={(label) => formatFechaCorta(String(label))}
+            formatter={(value) => [formatMoney(Number(value)), 'Vendido']}
             contentStyle={{ borderRadius: 8, borderColor: 'var(--color-ink-200)', fontSize: 13 }}
           />
           <Area type="monotone" dataKey="total" stroke="var(--color-brand-500)" fill="url(#tendenciaVentas)" strokeWidth={2} />

@@ -27,7 +27,7 @@ export function MetodoPagoChart({ data }: { data: Record<string, number> }) {
             ))}
           </Pie>
           <Tooltip
-            formatter={(value: number) => formatMoney(value)}
+            formatter={(value) => formatMoney(Number(value))}
             contentStyle={{ borderRadius: 8, borderColor: 'var(--color-ink-200)', fontSize: 13 }}
           />
           <Legend wrapperStyle={{ fontSize: 12 }} />
