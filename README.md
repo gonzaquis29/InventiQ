@@ -1,6 +1,6 @@
 # InventiQ
 
-Sistema de gestión para una tienda Mype tipo bazar/papelería: inventario, punto de venta (POS), compras a proveedores, caja diaria y reportes.
+Sistema de gestión para una tienda Mype tipo bazar/papelería: inventario, punto de venta (POS), compras a proveedores, caja del día y reportes.
 
 ## Stack
 
@@ -93,7 +93,16 @@ Variables obligatorias en el servidor: `DATABASE_URL`, `JWT_SECRET` (aleatorio, 
 | `npm run migrate:deploy` | Aplica migraciones pendientes (producción) |
 | `npx prisma studio` | Explorador visual de la base de datos |
 
+## Pruebas
+
+```bash
+cd backend
+npm run test:e2e   # usa su propia base `inventiq_test` (se crea sola); requiere `npm run dev:db` corriendo
+```
+
+Cubren venta sin caja, control de stock, ganancia con costo guardado, caja del día y cuadre, permisos, anulación (sin doble devolución), paginación y el reporte de menor rotación.
+
 ## Roles
 
 - **Administrador**: acceso total (usuarios, inventario, compras, proveedores, configuración, reportes).
-- **Vendedor**: punto de venta, consulta de inventario, caja diaria. Sin acceso a compras/reportes/configuración.
+- **Vendedor**: punto de venta, consulta de inventario, caja del día (gastos y cuadre). Sin acceso a compras/reportes/configuración.

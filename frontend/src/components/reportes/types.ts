@@ -12,6 +12,13 @@ export interface ProductoVendido {
   total: number;
 }
 
+export interface ProductoSinRotacion {
+  id: string;
+  nombre: string;
+  stock: number;
+  valorCosto: number;
+}
+
 export interface Ganancias {
   ingresos: number;
   costos: number;

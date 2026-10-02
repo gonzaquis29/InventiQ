@@ -25,6 +25,11 @@ export class ReportesController {
     return this.reportesService.productosMasVendidos(this.rango(desde, hasta), limit ? Number(limit) : 10);
   }
 
+  @Get('productos-sin-rotacion')
+  productosSinRotacion(@Query('desde') desde?: string, @Query('hasta') hasta?: string, @Query('limit') limit?: string) {
+    return this.reportesService.productosSinRotacion(this.rango(desde, hasta), limit ? Number(limit) : 20);
+  }
+
   @Get('ganancias')
   ganancias(@Query('desde') desde?: string, @Query('hasta') hasta?: string) {
     return this.reportesService.ganancias(this.rango(desde, hasta));

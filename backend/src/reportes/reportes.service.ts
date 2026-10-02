@@ -79,6 +79,22 @@ export class ReportesService {
       .slice(0, limit);
   }
 
+  async productosSinRotacion({ desde, hasta }: RangoFechas, limit = 20) {
+    const productos = await this.prisma.producto.findMany({
+      where: {
+        activo: true,
+        stock: { gt: 0 },
+        detallesVenta: { none: { venta: { anulada: false, createdAt: { gte: desde, lte: hasta } } } },
+      },
+      select: { id: true, nombre: true, stock: true, precioCompra: true },
+    });
+
+    return productos
+      .map((p) => ({ id: p.id, nombre: p.nombre, stock: p.stock, valorCosto: p.stock * Number(p.precioCompra) }))
+      .sort((a, b) => b.valorCosto - a.valorCosto)
+      .slice(0, limit);
+  }
+
   async ganancias({ desde, hasta }: RangoFechas) {
     const detalles = await this.prisma.detalleVenta.findMany({
       where: { venta: { anulada: false, createdAt: { gte: desde, lte: hasta } } },

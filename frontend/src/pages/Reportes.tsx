@@ -8,7 +8,7 @@ import { exportarReporteCaja, exportarReporteInventario, exportarReporteVentas }
 import { ReportesVentasTab } from '@/components/reportes/ReportesVentasTab';
 import { ReportesInventarioTab } from '@/components/reportes/ReportesInventarioTab';
 import { ReportesCajaTab } from '@/components/reportes/ReportesCajaTab';
-import type { CuadreCajaReporte, Ganancias, ProductoVendido, ResumenVentas, ValorizacionInventario } from '@/components/reportes/types';
+import type { CuadreCajaReporte, Ganancias, ProductoSinRotacion, ProductoVendido, ResumenVentas, ValorizacionInventario } from '@/components/reportes/types';
 import { PageHeader } from '@/components/ui/PageHeader';
 
 const TABS = [
@@ -32,6 +32,7 @@ export default function Reportes() {
 
   const [resumen, setResumen] = useState<ResumenVentas | null>(null);
   const [masVendidos, setMasVendidos] = useState<ProductoVendido[]>([]);
+  const [sinRotacion, setSinRotacion] = useState<ProductoSinRotacion[]>([]);
   const [ganancias, setGanancias] = useState<Ganancias | null>(null);
   const [cierres, setCierres] = useState<CuadreCajaReporte[]>([]);
   const [inventario, setInventario] = useState<ValorizacionInventario | null>(null);
@@ -40,6 +41,7 @@ export default function Reportes() {
     const params = { desde: new Date(desde).toISOString(), hasta: new Date(`${hasta}T23:59:59`).toISOString() };
     api.get<ResumenVentas>('/reportes/ventas', { params }).then((res) => setResumen(res.data));
     api.get<ProductoVendido[]>('/reportes/productos-mas-vendidos', { params }).then((res) => setMasVendidos(res.data));
+    api.get<ProductoSinRotacion[]>('/reportes/productos-sin-rotacion', { params }).then((res) => setSinRotacion(res.data));
     api.get<Ganancias>('/reportes/ganancias', { params }).then((res) => setGanancias(res.data));
     api.get<CuadreCajaReporte[]>('/reportes/caja', { params }).then((res) => setCierres(res.data));
   }, [desde, hasta]);
@@ -50,7 +52,7 @@ export default function Reportes() {
   }, []);
 
   const exportar = () => {
-    if (activa === 'ventas' && resumen) exportarReporteVentas(desde, hasta, resumen, masVendidos, ganancias);
+    if (activa === 'ventas' && resumen) exportarReporteVentas(desde, hasta, resumen, masVendidos, sinRotacion, ganancias);
     if (activa === 'inventario' && inventario) exportarReporteInventario(inventario);
     if (activa === 'caja') exportarReporteCaja(desde, hasta, cierres);
   };
@@ -97,7 +99,7 @@ export default function Reportes() {
         ))}
       </div>
 
-      {activa === 'ventas' && <ReportesVentasTab resumen={resumen} masVendidos={masVendidos} ganancias={ganancias} />}
+      {activa === 'ventas' && <ReportesVentasTab resumen={resumen} masVendidos={masVendidos} sinRotacion={sinRotacion} ganancias={ganancias} />}
       {activa === 'inventario' && <ReportesInventarioTab inventario={inventario} />}
       {activa === 'caja' && <ReportesCajaTab cierres={cierres} />}
     </div>

@@ -1,9 +1,9 @@
 import { descargarCsv } from './csv';
-import type { CuadreCajaReporte, Ganancias, ProductoVendido, ResumenVentas, ValorizacionInventario } from '@/components/reportes/types';
+import type { CuadreCajaReporte, Ganancias, ProductoSinRotacion, ProductoVendido, ResumenVentas, ValorizacionInventario } from '@/components/reportes/types';
 
 const SEPARADOR: string[] = [];
 
-export function exportarReporteVentas(desde: string, hasta: string, resumen: ResumenVentas, masVendidos: ProductoVendido[], ganancias: Ganancias | null) {
+export function exportarReporteVentas(desde: string, hasta: string, resumen: ResumenVentas, masVendidos: ProductoVendido[], sinRotacion: ProductoSinRotacion[], ganancias: Ganancias | null) {
   descargarCsv(`reporte-ventas_${desde}_${hasta}.csv`, [
     ['Reporte de ventas', `${desde} a ${hasta}`],
     SEPARADOR,
@@ -29,6 +29,10 @@ export function exportarReporteVentas(desde: string, hasta: string, resumen: Res
     ['Productos más vendidos'],
     ['Producto', 'Cantidad', 'Total'],
     ...masVendidos.map((p) => [p.nombre, p.cantidad, p.total]),
+    SEPARADOR,
+    ['Sin ventas en el período'],
+    ['Producto', 'Stock', 'Capital (costo)'],
+    ...sinRotacion.map((p) => [p.nombre, p.stock, p.valorCosto]),
   ]);
 }
 
