@@ -7,7 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { cn } from '@/lib/cn';
 import { useAuth } from '@/context/AuthContext';
-import type { CajaSesion, Producto, Venta } from '@/types';
+import { PageHeader } from '@/components/ui/PageHeader';
+import type { Paginated, Producto, ResumenCajaDia, Venta } from '@/types';
 
 export default function Dashboard() {
   const { usuario } = useAuth();
@@ -15,15 +16,15 @@ export default function Dashboard() {
 
   const [stockBajo, setStockBajo] = useState<Producto[]>([]);
   const [recientes, setRecientes] = useState<Venta[]>([]);
-  const [cajaActual, setCajaActual] = useState<CajaSesion | null>(null);
+  const [cajaHoy, setCajaHoy] = useState<ResumenCajaDia | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([api.get<Producto[]>('/productos/stock-bajo'), api.get<Venta[]>('/ventas'), api.get<CajaSesion | null>('/caja/actual')])
+    Promise.all([api.get<Producto[]>('/productos/stock-bajo'), api.get<Paginated<Venta>>('/ventas', { params: { pageSize: 5 } }), api.get<ResumenCajaDia>('/caja/dia')])
       .then(([stockRes, ventasRes, cajaRes]) => {
         setStockBajo(stockRes.data);
-        setRecientes(ventasRes.data.slice(0, 5));
-        setCajaActual(cajaRes.data);
+        setRecientes(ventasRes.data.data);
+        setCajaHoy(cajaRes.data);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -40,13 +41,13 @@ export default function Dashboard() {
       cardBg: 'bg-brand-50',
     },
     {
-      label: cajaActual ? 'Ver caja' : 'Abrir caja',
-      desc: cajaActual ? 'Caja abierta — revisa movimientos' : 'Registra el monto inicial del día',
+      label: 'Caja del día',
+      desc: cajaHoy ? `Efectivo esperado: ${formatMoney(cajaHoy.efectivoEsperado)}` : 'Ventas y efectivo de hoy',
       icon: Wallet,
       to: '/caja',
       roles: ['ADMIN', 'VENDEDOR'],
-      chip: cajaActual ? 'bg-emerald-600 text-white' : 'bg-amber-warn text-white',
-      borderTop: cajaActual ? 'border-t-emerald-600' : 'border-t-amber-warn',
+      chip: 'bg-emerald-600 text-white',
+      borderTop: 'border-t-emerald-600',
     },
     {
       label: 'Registrar compra',
@@ -70,10 +71,7 @@ export default function Dashboard() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="font-display text-2xl font-bold text-ink-900">Hola, {usuario?.nombre?.split(' ')[0]}</h1>
-        <p className="text-sm text-ink-500">Esto es lo que puedes hacer ahora en tu bazar.</p>
-      </div>
+      <PageHeader title={`Hola, ${usuario?.nombre?.split(' ')[0] ?? ''}`} description="Esto es lo que puedes hacer ahora en tu bazar." ayuda="inicio" />
 
       {!loading && stockBajo.length > 0 && (
         <Link

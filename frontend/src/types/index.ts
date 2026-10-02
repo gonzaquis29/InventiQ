@@ -106,25 +106,40 @@ export interface Venta {
   }>;
 }
 
-export type EstadoCaja = 'ABIERTA' | 'CERRADA';
-
-export interface MovimientoCaja {
+export interface GastoCaja {
   id: string;
-  tipo: 'VENTA' | 'RETIRO' | 'INGRESO' | 'APERTURA';
-  monto: string;
-  motivo: string | null;
+  usuarioId: string;
+  usuario: string;
+  monto: number;
+  motivo: string;
   createdAt: string;
 }
 
-export interface CajaSesion {
+export interface CuadreCaja {
   id: string;
-  usuarioId: string;
-  fechaApertura: string;
-  montoApertura: string;
-  fechaCierre: string | null;
-  montoContado: string | null;
-  montoEsperado: string | null;
-  diferencia: string | null;
-  estado: EstadoCaja;
-  movimientosCaja?: MovimientoCaja[];
+  usuario: string;
+  montoEsperado: number;
+  montoContado: number;
+  diferencia: number;
+  nota: string | null;
+  createdAt: string;
+}
+
+export interface ResumenCajaDia {
+  fecha: string;
+  esHoy: boolean;
+  ventas: {
+    cantidad: number;
+    anuladas: number;
+    total: number;
+    efectivo: number;
+    tarjeta: number;
+    yapePlin: number;
+    digitalMixto: number;
+  };
+  porVendedor: { nombre: string; cantidad: number; total: number }[];
+  gastos: GastoCaja[];
+  totalGastos: number;
+  efectivoEsperado: number;
+  cuadres: CuadreCaja[];
 }

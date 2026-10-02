@@ -82,14 +82,13 @@ export class ReportesService {
   async ganancias({ desde, hasta }: RangoFechas) {
     const detalles = await this.prisma.detalleVenta.findMany({
       where: { venta: { anulada: false, createdAt: { gte: desde, lte: hasta } } },
-      include: { producto: { select: { precioCompra: true } } },
     });
 
     let ingresos = 0;
     let costos = 0;
     for (const d of detalles) {
       ingresos += d.cantidad * Number(d.precioUnitario) - Number(d.descuento);
-      costos += d.cantidad * Number(d.producto.precioCompra);
+      costos += d.cantidad * Number(d.costoUnitario);
     }
 
     return { ingresos, costos, ganancia: ingresos - costos };
@@ -129,22 +128,23 @@ export class ReportesService {
     };
   }
 
-  async cierresCaja({ desde, hasta }: RangoFechas) {
-    const sesiones = await this.prisma.cajaSesion.findMany({
-      where: { estado: 'CERRADA', fechaCierre: { gte: desde, lte: hasta } },
+  async cuadresCaja({ desde, hasta }: RangoFechas) {
+    const cuadres = await this.prisma.cuadreCaja.findMany({
+      where: { createdAt: { gte: desde, lte: hasta } },
       include: { usuario: { select: { nombre: true } } },
-      orderBy: { fechaCierre: 'desc' },
+      orderBy: { createdAt: 'desc' },
     });
 
-    return sesiones.map((s) => ({
-      id: s.id,
-      usuario: s.usuario.nombre,
-      fechaApertura: s.fechaApertura,
-      fechaCierre: s.fechaCierre,
-      montoApertura: Number(s.montoApertura),
-      montoEsperado: Number(s.montoEsperado),
-      montoContado: Number(s.montoContado),
-      diferencia: Number(s.diferencia),
+    return cuadres.map((c) => ({
+      id: c.id,
+      usuario: c.usuario.nombre,
+      fecha: c.createdAt,
+      efectivoVentas: Number(c.efectivoVentas),
+      gastos: Number(c.gastos),
+      montoEsperado: Number(c.montoEsperado),
+      montoContado: Number(c.montoContado),
+      diferencia: Number(c.diferencia),
+      nota: c.nota,
     }));
   }
 }

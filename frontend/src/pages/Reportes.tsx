@@ -8,7 +8,8 @@ import { exportarReporteCaja, exportarReporteInventario, exportarReporteVentas }
 import { ReportesVentasTab } from '@/components/reportes/ReportesVentasTab';
 import { ReportesInventarioTab } from '@/components/reportes/ReportesInventarioTab';
 import { ReportesCajaTab } from '@/components/reportes/ReportesCajaTab';
-import type { CierreCaja, Ganancias, ProductoVendido, ResumenVentas, ValorizacionInventario } from '@/components/reportes/types';
+import type { CuadreCajaReporte, Ganancias, ProductoVendido, ResumenVentas, ValorizacionInventario } from '@/components/reportes/types';
+import { PageHeader } from '@/components/ui/PageHeader';
 
 const TABS = [
   { key: 'ventas', label: 'Ventas', icon: ShoppingCart, conFecha: true },
@@ -32,7 +33,7 @@ export default function Reportes() {
   const [resumen, setResumen] = useState<ResumenVentas | null>(null);
   const [masVendidos, setMasVendidos] = useState<ProductoVendido[]>([]);
   const [ganancias, setGanancias] = useState<Ganancias | null>(null);
-  const [cierres, setCierres] = useState<CierreCaja[]>([]);
+  const [cierres, setCierres] = useState<CuadreCajaReporte[]>([]);
   const [inventario, setInventario] = useState<ValorizacionInventario | null>(null);
 
   useEffect(() => {
@@ -40,7 +41,7 @@ export default function Reportes() {
     api.get<ResumenVentas>('/reportes/ventas', { params }).then((res) => setResumen(res.data));
     api.get<ProductoVendido[]>('/reportes/productos-mas-vendidos', { params }).then((res) => setMasVendidos(res.data));
     api.get<Ganancias>('/reportes/ganancias', { params }).then((res) => setGanancias(res.data));
-    api.get<CierreCaja[]>('/reportes/caja', { params }).then((res) => setCierres(res.data));
+    api.get<CuadreCajaReporte[]>('/reportes/caja', { params }).then((res) => setCierres(res.data));
   }, [desde, hasta]);
 
   useEffect(() => {
@@ -56,28 +57,30 @@ export default function Reportes() {
 
   return (
     <div>
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-        <h1 className="font-display text-2xl font-bold text-ink-900">Reportes</h1>
-        <div className="flex flex-wrap items-end gap-3">
-          {tab.conFecha && (
-            <>
-            <div>
-              <Label htmlFor="desde">Desde</Label>
-              <Input id="desde" type="date" value={desde} onChange={(e) => setDesde(e.target.value)} />
-            </div>
-            <div>
-              <Label htmlFor="hasta">Hasta</Label>
-              <Input id="hasta" type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} />
-            </div>
-            </>
-          )}
-          <Button variant="outline" onClick={exportar}>
-            <Download size={16} />
-            Exportar CSV
-          </Button>
-        </div>
-      </div>
-
+      <PageHeader
+        title="Reportes"
+        ayuda="reportes"
+        actions={
+          <>
+            {tab.conFecha && (
+              <>
+                <div>
+                  <Label htmlFor="desde">Desde</Label>
+                  <Input id="desde" type="date" value={desde} onChange={(e) => setDesde(e.target.value)} />
+                </div>
+                <div>
+                  <Label htmlFor="hasta">Hasta</Label>
+                  <Input id="hasta" type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} />
+                </div>
+              </>
+            )}
+            <Button variant="outline" onClick={exportar}>
+              <Download size={16} />
+              Exportar CSV
+            </Button>
+          </>
+        }
+      />
       <div className="mb-6 flex gap-1 border-b border-ink-100">
         {TABS.map((t) => (
           <button

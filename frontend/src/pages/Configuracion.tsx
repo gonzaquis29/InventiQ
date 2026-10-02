@@ -3,6 +3,7 @@ import { Tag, Award, Ruler } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { Card, CardContent } from '@/components/ui/Card';
 import { CatalogoSimple } from '@/components/configuracion/CatalogoSimple';
+import { PageHeader } from '@/components/ui/PageHeader';
 
 const TABS = [
   {
@@ -36,10 +37,11 @@ export default function Configuracion() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="font-display text-2xl font-bold text-ink-900">Configuración</h1>
-        <p className="text-sm text-ink-500">Catálogos que usa el resto del sistema — agrega, renombra o elimina sin tocar código.</p>
-      </div>
+      <PageHeader
+        title="Configuración"
+        description="Catálogos que usa el resto del sistema — agrega, renombra o elimina sin tocar código."
+        ayuda="configuracion"
+      />
 
       <div className="mb-4 flex gap-1 border-b border-ink-100">
         {TABS.map((t) => (

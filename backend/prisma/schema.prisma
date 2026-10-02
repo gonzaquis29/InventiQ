@@ -26,18 +26,6 @@ enum TipoMovimientoStock {
   ANULACION_VENTA
 }
 
-enum TipoMovimientoCaja {
-  VENTA
-  RETIRO
-  INGRESO
-  APERTURA
-}
-
-enum EstadoCaja {
-  ABIERTA
-  CERRADA
-}
-
 model Usuario {
   id           String   @id @default(uuid())
   nombre       String
@@ -51,7 +39,8 @@ model Usuario {
   ventas           Venta[]
   compras          Compra[]
   movimientosStock MovimientoStock[]
-  sesionesCaja     CajaSesion[]
+  gastosCaja       GastoCaja[]
+  cuadresCaja      CuadreCaja[]
 
   @@map("usuarios")
 }
@@ -183,8 +172,6 @@ model Venta {
   id              String      @id @default(uuid())
   usuarioId       String
   usuario         Usuario     @relation(fields: [usuarioId], references: [id])
-  cajaSesionId    String?
-  cajaSesion      CajaSesion? @relation(fields: [cajaSesionId], references: [id])
   total           Decimal     @db.Decimal(10, 2)
   metodoPago      MetodoPago
   montoEfectivo   Decimal     @default(0) @db.Decimal(10, 2)
@@ -194,7 +181,6 @@ model Venta {
   createdAt       DateTime    @default(now())
 
   detalles        DetalleVenta[]
-  movimientosCaja MovimientoCaja[]
 
   @@map("ventas")
 }
@@ -214,6 +200,9 @@ model DetalleVenta {
   descuento      Decimal  @default(0) @db.Decimal(10, 2)
   unidadVendida  String   @default("unidad")
   factorUnidad   Decimal  @default(1) @db.Decimal(12, 3)
+  // Costo de compra por unidad estándar al momento de la venta: así la ganancia de ventas
+  // pasadas no cambia cuando luego se registra una compra a otro precio.
+  costoUnitario  Decimal  @default(0) @db.Decimal(10, 2)
 
   @@map("detalles_venta")
 }
@@ -233,34 +222,32 @@ model UnidadProducto {
   @@map("unidades_producto")
 }
 
-model CajaSesion {
-  id            String     @id @default(uuid())
-  usuarioId     String
-  usuario       Usuario    @relation(fields: [usuarioId], references: [id])
-  fechaApertura DateTime   @default(now())
-  montoApertura Decimal    @db.Decimal(10, 2)
-  fechaCierre   DateTime?
-  montoContado  Decimal?   @db.Decimal(10, 2)
-  montoEsperado Decimal?   @db.Decimal(10, 2)
-  diferencia    Decimal?   @db.Decimal(10, 2)
-  estado        EstadoCaja @default(ABIERTA)
+// Dinero que sale del efectivo de ventas (delivery, pasajes, pago a proveedor...).
+model GastoCaja {
+  id        String   @id @default(uuid())
+  usuarioId String
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id])
+  monto     Decimal  @db.Decimal(10, 2)
+  motivo    String
+  createdAt DateTime @default(now())
 
-  ventas          Venta[]
-  movimientosCaja MovimientoCaja[]
-
-  @@map("caja_sesiones")
+  @@index([createdAt])
+  @@map("gastos_caja")
 }
 
-model MovimientoCaja {
-  id           String             @id @default(uuid())
-  cajaSesionId String
-  cajaSesion   CajaSesion         @relation(fields: [cajaSesionId], references: [id])
-  ventaId      String?
-  venta        Venta?             @relation(fields: [ventaId], references: [id])
-  tipo         TipoMovimientoCaja
-  monto        Decimal            @db.Decimal(10, 2)
-  motivo       String?
-  createdAt    DateTime           @default(now())
+// Conteo opcional del efectivo: foto de lo esperado vs. lo contado en ese momento del día.
+model CuadreCaja {
+  id             String   @id @default(uuid())
+  usuarioId      String
+  usuario        Usuario  @relation(fields: [usuarioId], references: [id])
+  efectivoVentas Decimal  @db.Decimal(10, 2)
+  gastos         Decimal  @db.Decimal(10, 2)
+  montoEsperado  Decimal  @db.Decimal(10, 2)
+  montoContado   Decimal  @db.Decimal(10, 2)
+  diferencia     Decimal  @db.Decimal(10, 2)
+  nota           String?
+  createdAt      DateTime @default(now())
 
-  @@map("movimientos_caja")
+  @@index([createdAt])
+  @@map("cuadres_caja")
 }

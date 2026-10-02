@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { Input, Label, Select } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
 import type { Paginated, Producto, Proveedor, UnidadMedida } from '@/types';
+import { PageHeader } from '@/components/ui/PageHeader';
 
 interface CompraHistorial {
   id: string;
@@ -175,16 +176,17 @@ export default function Compras() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="font-display text-2xl font-bold text-ink-900">Compras</h1>
-          <p className="text-sm text-ink-500">Ingresos de mercadería de tus proveedores</p>
-        </div>
-        <Button onClick={abrirModal}>
-          <Plus size={16} />
-          Nueva compra
-        </Button>
-      </div>
+      <PageHeader
+        title="Compras"
+        description="Ingresos de mercadería de tus proveedores"
+        ayuda="compras"
+        actions={
+          <Button onClick={abrirModal}>
+            <Plus size={16} />
+            Nueva compra
+          </Button>
+        }
+      />
 
       <Card>
         <CardContent className="p-0">

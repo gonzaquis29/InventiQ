@@ -42,7 +42,7 @@ const NAV_GROUPS: NavGroupDef[] = [
       { to: '/inventario', label: 'Inventario', icon: Package, roles: ['ADMIN', 'VENDEDOR'] },
       { to: '/compras', label: 'Compras', icon: Truck, roles: ['ADMIN'] },
       { to: '/proveedores', label: 'Proveedores', icon: Building2, roles: ['ADMIN'] },
-      { to: '/caja', label: 'Caja diaria', icon: Wallet, roles: ['ADMIN', 'VENDEDOR'] },
+      { to: '/caja', label: 'Caja del día', icon: Wallet, roles: ['ADMIN', 'VENDEDOR'] },
       { to: '/reportes', label: 'Reportes', icon: BarChart3, roles: ['ADMIN'] },
     ],
   },

@@ -1,5 +1,5 @@
 import { descargarCsv } from './csv';
-import type { CierreCaja, Ganancias, ProductoVendido, ResumenVentas, ValorizacionInventario } from '@/components/reportes/types';
+import type { CuadreCajaReporte, Ganancias, ProductoVendido, ResumenVentas, ValorizacionInventario } from '@/components/reportes/types';
 
 const SEPARADOR: string[] = [];
 
@@ -49,9 +49,18 @@ export function exportarReporteInventario(inv: ValorizacionInventario) {
   ]);
 }
 
-export function exportarReporteCaja(desde: string, hasta: string, cierres: CierreCaja[]) {
+export function exportarReporteCaja(desde: string, hasta: string, cierres: CuadreCajaReporte[]) {
   descargarCsv(`reporte-caja_${desde}_${hasta}.csv`, [
-    ['Fecha de cierre', 'Usuario', 'Esperado', 'Contado', 'Diferencia'],
-    ...cierres.map((c) => [new Date(c.fechaCierre).toLocaleString('es-PE'), c.usuario, c.montoEsperado, c.montoContado, c.diferencia]),
+    ['Fecha', 'Usuario', 'Efectivo de ventas', 'Gastos', 'Esperado', 'Contado', 'Diferencia', 'Nota'],
+    ...cierres.map((c) => [
+      new Date(c.fecha).toLocaleString('es-PE'),
+      c.usuario,
+      c.efectivoVentas,
+      c.gastos,
+      c.montoEsperado,
+      c.montoContado,
+      c.diferencia,
+      c.nota ?? '',
+    ]),
   ]);
 }

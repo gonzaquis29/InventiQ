@@ -12,6 +12,7 @@ import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { ImportarProductosModal } from '@/components/inventario/ImportarProductosModal';
 import { AjustarStockModal } from '@/components/inventario/AjustarStockModal';
 import type { Categoria, Marca, Paginated, Producto } from '@/types';
+import { PageHeader } from '@/components/ui/PageHeader';
 
 const PAGE_SIZE = 10;
 
@@ -91,24 +92,25 @@ export default function Inventario() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="font-display text-2xl font-bold text-ink-900">Inventario</h1>
-          <p className="text-sm text-ink-500">{resultado?.total ?? '—'} productos</p>
-        </div>
-        {esAdmin && (
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => setImportarAbierto(true)}>
-              <Upload size={16} />
-              Importar
-            </Button>
-            <Button onClick={() => navigate('/inventario/nuevo')}>
-              <Plus size={16} />
-              Nuevo producto
-            </Button>
-          </div>
-        )}
-      </div>
+      <PageHeader
+        title="Inventario"
+        description={`${resultado?.total ?? '—'} productos`}
+        ayuda="inventario"
+        actions={
+          esAdmin && (
+            <>
+              <Button variant="outline" onClick={() => setImportarAbierto(true)}>
+                <Upload size={16} />
+                Importar
+              </Button>
+              <Button onClick={() => navigate('/inventario/nuevo')}>
+                <Plus size={16} />
+                Nuevo producto
+              </Button>
+            </>
+          )
+        }
+      />
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <div className="relative w-full max-w-xs">

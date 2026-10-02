@@ -31,8 +31,8 @@ export class ReportesController {
   }
 
   @Get('caja')
-  cierresCaja(@Query('desde') desde?: string, @Query('hasta') hasta?: string) {
-    return this.reportesService.cierresCaja(this.rango(desde, hasta));
+  cuadresCaja(@Query('desde') desde?: string, @Query('hasta') hasta?: string) {
+    return this.reportesService.cuadresCaja(this.rango(desde, hasta));
   }
 
   @Get('inventario')

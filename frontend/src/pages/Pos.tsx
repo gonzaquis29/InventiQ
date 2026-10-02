@@ -1,16 +1,16 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
-import { Link } from 'react-router-dom';
-import { Search, Plus, Minus, Trash2, ScanBarcode, PackageX, AlertTriangle, Printer, CheckCircle2 } from 'lucide-react';
+import { Search, Plus, Minus, Trash2, PackageX, AlertTriangle, Printer, CheckCircle2 } from 'lucide-react';
 import { api, apiErrorMessage } from '@/lib/api';
 import { formatMoney } from '@/lib/format';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import { Card, CardContent } from '@/components/ui/Card';
-import { Button, buttonVariants } from '@/components/ui/Button';
+import { Button } from '@/components/ui/Button';
 import { Input, Label } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
+import { PageHeader } from '@/components/ui/PageHeader';
 import { imprimirComprobante, type ComprobanteData } from '@/lib/comprobante';
-import type { CajaSesion, Categoria, ItemCarrito, MetodoPago, Paginated, Producto } from '@/types';
+import type { Categoria, ItemCarrito, MetodoPago, Paginated, Producto } from '@/types';
 
 const METODOS: { value: MetodoPago; label: string }[] = [
   { value: 'EFECTIVO', label: 'Efectivo' },
@@ -37,8 +37,6 @@ function precioPorDefecto(producto: Producto, factor: number) {
 export default function Pos() {
   const { usuario } = useAuth();
   const { notify } = useToast();
-  const [cajaActual, setCajaActual] = useState<CajaSesion | null>(null);
-  const [cajaLoading, setCajaLoading] = useState(true);
 
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [categoriaId, setCategoriaId] = useState('');
@@ -55,10 +53,6 @@ export default function Pos() {
   const [recibo, setRecibo] = useState<ComprobanteData | null>(null);
 
   useEffect(() => {
-    api
-      .get<CajaSesion | null>('/caja/actual')
-      .then((res) => setCajaActual(res.data))
-      .finally(() => setCajaLoading(false));
     api.get<Categoria[]>('/categorias').then((res) => setCategorias(res.data));
     inputRef.current?.focus();
   }, []);
@@ -216,8 +210,6 @@ export default function Pos() {
       });
       setConfirmando(false);
       limpiarVenta();
-      const cajaRes = await api.get<CajaSesion | null>('/caja/actual');
-      setCajaActual(cajaRes.data);
     } catch (err) {
       notify(apiErrorMessage(err, 'No se pudo registrar la venta'), 'error');
       setConfirmando(false);
@@ -226,27 +218,10 @@ export default function Pos() {
     }
   }
 
-  if (!cajaLoading && !cajaActual) {
-    return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
-        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-amber-warn-bg text-amber-warn">
-          <ScanBarcode size={26} />
-        </div>
-        <h1 className="mb-1 font-display text-xl font-bold text-ink-900">Abre tu caja para empezar a vender</h1>
-        <p className="mb-5 max-w-sm text-sm text-ink-500">
-          Antes de registrar ventas necesitas abrir tu caja del día con el monto inicial de efectivo.
-        </p>
-        <Link to="/caja" className={buttonVariants({ variant: 'primary', size: 'md' })}>
-          Ir a Caja diaria
-        </Link>
-      </div>
-    );
-  }
-
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_420px]">
       <div>
-        <h1 className="mb-4 font-display text-2xl font-bold text-ink-900">Punto de venta</h1>
+        <PageHeader title="Punto de venta" ayuda="pos" className="mb-4" />
 
         <div className="relative mb-4">
           <Search size={18} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-400" />

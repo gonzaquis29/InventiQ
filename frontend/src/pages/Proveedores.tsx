@@ -9,6 +9,7 @@ import { Input, Label } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 import { Modal } from '@/components/ui/Modal';
 import type { Proveedor } from '@/types';
+import { PageHeader } from '@/components/ui/PageHeader';
 
 interface CompraProveedor {
   id: string;
@@ -105,26 +106,27 @@ export default function Proveedores() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="font-display text-2xl font-bold text-ink-900">Proveedores</h1>
-          <p className="text-sm text-ink-500">{proveedores.length} proveedores</p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setMostrarInactivos((v) => !v)}
-            className={`rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
-              mostrarInactivos ? 'border-ink-300 bg-ink-100 text-ink-700' : 'border-ink-200 bg-white text-ink-600 hover:bg-ink-50'
-            }`}
-          >
-            {mostrarInactivos ? 'Ocultar inactivos' : 'Mostrar inactivos'}
-          </button>
-          <Button onClick={abrirNuevo}>
-            <Plus size={16} />
-            Nuevo proveedor
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Proveedores"
+        description={`${proveedores.length} proveedores`}
+        ayuda="proveedores"
+        actions={
+          <>
+            <button
+              onClick={() => setMostrarInactivos((v) => !v)}
+              className={`rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
+                mostrarInactivos ? 'border-ink-300 bg-ink-100 text-ink-700' : 'border-ink-200 bg-white text-ink-600 hover:bg-ink-50'
+              }`}
+            >
+              {mostrarInactivos ? 'Ocultar inactivos' : 'Mostrar inactivos'}
+            </button>
+            <Button onClick={abrirNuevo}>
+              <Plus size={16} />
+              Nuevo proveedor
+            </Button>
+          </>
+        }
+      />
 
       <Card>
         <CardContent className="p-0">

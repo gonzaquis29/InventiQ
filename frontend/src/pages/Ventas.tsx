@@ -4,7 +4,12 @@ import { api } from '@/lib/api';
 import { formatMoney, formatDateTime } from '@/lib/format';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
-import type { MetodoPago, Venta } from '@/types';
+import { Button } from '@/components/ui/Button';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import type { MetodoPago, Paginated, Venta } from '@/types';
+import { PageHeader } from '@/components/ui/PageHeader';
+
+const PAGE_SIZE = 25;
 
 const METODO_LABEL: Record<MetodoPago, string> = {
   EFECTIVO: 'Efectivo',
@@ -15,22 +20,28 @@ const METODO_LABEL: Record<MetodoPago, string> = {
 
 export default function Ventas() {
   const navigate = useNavigate();
-  const [ventas, setVentas] = useState<Venta[]>([]);
+  const [resultado, setResultado] = useState<Paginated<Venta> | null>(null);
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
     api
-      .get<Venta[]>('/ventas')
-      .then((res) => setVentas(res.data))
+      .get<Paginated<Venta>>('/ventas', { params: { page, pageSize: PAGE_SIZE } })
+      .then((res) => setResultado(res.data))
       .finally(() => setLoading(false));
-  }, []);
+  }, [page]);
+
+  const ventas = resultado?.data ?? [];
+  const totalPaginas = resultado ? Math.max(Math.ceil(resultado.total / PAGE_SIZE), 1) : 1;
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="font-display text-2xl font-bold text-ink-900">Ventas</h1>
-        <p className="text-sm text-ink-500">Historial de ventas registradas</p>
-      </div>
+      <PageHeader
+        title="Ventas"
+        description={resultado ? `${resultado.total} ventas registradas` : 'Historial de ventas registradas'}
+        ayuda="ventas"
+      />
 
       <Card>
         <CardContent className="p-0">
@@ -69,6 +80,28 @@ export default function Ventas() {
               </tbody>
             </table>
           </div>
+
+          {resultado && resultado.total > PAGE_SIZE && (
+            <div className="flex items-center justify-between border-t border-ink-100 px-6 py-4">
+              <p className="text-xs text-ink-500">
+                Página {page} de {totalPaginas}
+              </p>
+              <div className="flex gap-1">
+                <Button variant="outline" size="sm" disabled={page <= 1 || loading} onClick={() => setPage((p) => p - 1)} aria-label="Página anterior">
+                  <ChevronLeft size={14} />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page >= totalPaginas || loading}
+                  onClick={() => setPage((p) => p + 1)}
+                  aria-label="Página siguiente"
+                >
+                  <ChevronRight size={14} />
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

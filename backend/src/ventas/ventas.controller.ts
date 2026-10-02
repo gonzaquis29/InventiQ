@@ -15,10 +15,17 @@ export class VentasController {
   constructor(private ventasService: VentasService) {}
 
   @Get()
-  findAll(@Query('desde') desde?: string, @Query('hasta') hasta?: string) {
+  findAll(
+    @Query('desde') desde?: string,
+    @Query('hasta') hasta?: string,
+    @Query('page') page?: string,
+    @Query('pageSize') pageSize?: string,
+  ) {
     return this.ventasService.findAll({
       desde: desde ? new Date(desde) : undefined,
       hasta: hasta ? new Date(hasta) : undefined,
+      page: page ? Number(page) || 1 : undefined,
+      pageSize: pageSize ? Number(pageSize) || undefined : undefined,
     });
   }
 

@@ -18,13 +18,16 @@ export interface Ganancias {
   ganancia: number;
 }
 
-export interface CierreCaja {
+export interface CuadreCajaReporte {
   id: string;
   usuario: string;
-  fechaCierre: string;
+  fecha: string;
+  efectivoVentas: number;
+  gastos: number;
   montoEsperado: number;
   montoContado: number;
   diferencia: number;
+  nota: string | null;
 }
 
 export interface ValorizacionInventario {
