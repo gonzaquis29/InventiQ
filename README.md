@@ -31,30 +31,24 @@ npm install
 cp .env.example .env   # ajusta los valores si hace falta
 ```
 
-Genera la migración inicial (no se versiona, ver por qué en la sección de abajo) y levanta la base:
+Levanta la base y crea las tablas:
 
 ```bash
 npm run dev:db          # levanta Postgres embebido en :5433 (déjalo corriendo en su propia terminal)
-npx prisma migrate dev --name init   # crea prisma/migrations a partir de prisma/schema.prisma
+npx prisma migrate dev   # aplica prisma/migrations a la base local
 npm run start:dev        # API en http://localhost:3000/api
 ```
 
 ### Primer usuario (bootstrap)
 
-No hay registro público: crear usuarios desde la app requiere ya estar autenticado como Administrador (por diseño — ver RF-U2). Para crear el primer Administrador, insértalo directo en la base:
+No hay registro público: crear usuarios desde la app requiere ya estar autenticado como Administrador (por diseño — ver RF-U2). Para crear el primer Administrador:
 
 ```bash
 cd backend
-npx prisma studio
+npm run crear-admin      # pregunta nombre, email y contraseña
 ```
 
-En la tabla `usuarios`, crea una fila con `rol = ADMIN` y `passwordHash` igual al resultado de:
-
-```bash
-node -e "console.log(require('bcrypt').hashSync('TU_CONTRASEÑA', 10))"
-```
-
-Con ese usuario ya puedes iniciar sesión y crear el resto del equipo desde **Usuarios → Nuevo** dentro de la propia app. Si quieres datos de ejemplo (categorías/productos) para probar, crea tu propio `backend/prisma/seed.ts` local — `npm run seed` ya está configurado para correrlo, pero no se incluye uno en el repo.
+También acepta `ADMIN_NOMBRE`, `ADMIN_EMAIL` y `ADMIN_PASSWORD` como variables de entorno para correrlo sin preguntas (útil en la consola del hosting). Con ese usuario ya puedes iniciar sesión y crear el resto del equipo desde **Usuarios → Nuevo** dentro de la propia app. Si quieres datos de ejemplo (categorías/productos) para probar, crea tu propio `backend/prisma/seed.ts` local — `npm run seed` ya está configurado para correrlo, pero no se incluye uno en el repo.
 
 ### 2. Frontend
 
@@ -65,16 +59,9 @@ cp .env.example .env   # apunta VITE_API_URL al backend
 npm run dev             # http://localhost:5173
 ```
 
-## Base de datos (desarrollo local)
+## Base de datos y migraciones
 
-Este proyecto **no versiona `backend/prisma/migrations/`**. Cada quien genera su propia migración inicial a partir de `schema.prisma` (que sí es la fuente de verdad y está en el repo):
-
-```bash
-cd backend
-npx prisma migrate dev --name init
-```
-
-Esto crea una única migración con el esquema completo actual, sin arrastrar el historial de cambios incrementales del desarrollo original.
+Las migraciones de `backend/prisma/migrations/` **sí se versionan**: son la forma en que cualquier base (local o de producción) llega al esquema actual. `0_init` contiene el esquema completo de partida.
 
 ### Si modificas el modelo de datos
 
@@ -83,9 +70,16 @@ Esto crea una única migración con el esquema completo actual, sin arrastrar el
    ```bash
    npx prisma migrate dev --name describe_tu_cambio
    ```
-3. Commitea el `schema.prisma` (las migraciones quedan fuera del control de versiones, cada entorno las regenera/aplica localmente).
+3. Commitea el `schema.prisma` **y** la carpeta nueva de `prisma/migrations/`.
 
-Para producción, `npx prisma migrate deploy` aplica las migraciones pendientes sin generar nuevas.
+### Producción
+
+```bash
+npm run migrate:deploy   # aplica solo las migraciones pendientes, nunca genera ni borra datos
+npm run build && npm run start:prod
+```
+
+Variables obligatorias en el servidor: `DATABASE_URL`, `JWT_SECRET` (aleatorio, ≥ 32 caracteres: `openssl rand -hex 32`), `NODE_ENV=production`, `CORS_ORIGIN` (URL del frontend). El backend se niega a arrancar si `JWT_SECRET` falta o es el de ejemplo.
 
 ## Scripts útiles (backend)
 
@@ -95,6 +89,8 @@ Para producción, `npx prisma migrate deploy` aplica las migraciones pendientes 
 | `npm run build` | Compila a `dist/` |
 | `npm run dev:db` | Postgres embebido para desarrollo local |
 | `npm run seed` | Corre `prisma/seed.ts` si creaste uno local (no incluido en el repo) |
+| `npm run crear-admin` | Crea un usuario Administrador |
+| `npm run migrate:deploy` | Aplica migraciones pendientes (producción) |
 | `npx prisma studio` | Explorador visual de la base de datos |
 
 ## Roles

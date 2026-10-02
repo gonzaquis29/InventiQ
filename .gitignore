@@ -17,9 +17,6 @@ Inventario-limpio.csv
 docs/
 .superpowers/
 
-# Prisma migration history — regenerate locally instead of tracking it (see README)
-backend/prisma/migrations/
-
 # Seed script (has demo login credentials) — keep local-only
 backend/prisma/seed.ts
 

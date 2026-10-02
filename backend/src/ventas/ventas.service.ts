@@ -1,27 +1,32 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateVentaDto } from './dto/create-venta.dto';
 import { AnularVentaDto } from './dto/anular-venta.dto';
-import { EstadoCaja, MetodoPago, TipoMovimientoCaja, TipoMovimientoStock } from '@prisma/client';
+import { MetodoPago, TipoMovimientoStock } from '@prisma/client';
 
 @Injectable()
 export class VentasService {
   constructor(private prisma: PrismaService) {}
 
-  findAll(params: { desde?: Date; hasta?: Date }) {
-    return this.prisma.venta.findMany({
-      where: {
-        createdAt: {
-          gte: params.desde,
-          lte: params.hasta,
+  async findAll(params: { desde?: Date; hasta?: Date; page?: number; pageSize?: number }) {
+    const page = Math.max(params.page ?? 1, 1);
+    const pageSize = Math.min(Math.max(params.pageSize ?? 20, 1), 100);
+    const where = { createdAt: { gte: params.desde, lte: params.hasta } };
+
+    const [data, total] = await Promise.all([
+      this.prisma.venta.findMany({
+        where,
+        include: {
+          usuario: { select: { nombre: true } },
+          detalles: { include: { producto: { select: { nombre: true } } } },
         },
-      },
-      include: {
-        usuario: { select: { nombre: true } },
-        detalles: { include: { producto: { select: { nombre: true } } } },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      this.prisma.venta.count({ where }),
+    ]);
+    return { data, total, page, pageSize };
   }
 
   async findOne(id: string) {
@@ -37,13 +42,6 @@ export class VentasService {
   }
 
   async create(dto: CreateVentaDto, usuarioId: string) {
-    const cajaSesion = await this.prisma.cajaSesion.findFirst({
-      where: { usuarioId, estado: EstadoCaja.ABIERTA },
-    });
-    if (!cajaSesion) {
-      throw new BadRequestException('Debes abrir tu caja antes de registrar ventas');
-    }
-
     const productos = await this.prisma.producto.findMany({
       where: { id: { in: dto.detalles.map((d) => d.productoId) } },
     });
@@ -57,7 +55,8 @@ export class VentasService {
       const unidadVendida = d.unidadVendida ?? producto.unidad;
       const factorUnidad = d.factorUnidad ?? 1;
       total += d.cantidad * precioUnitario - descuento;
-      return { ...d, precioUnitario, descuento, unidadVendida, factorUnidad };
+      const costoUnitario = Number(producto.precioCompra);
+      return { ...d, precioUnitario, descuento, unidadVendida, factorUnidad, costoUnitario };
     });
 
     if (total < 0) throw new BadRequestException('El total de la venta no puede ser negativo');
@@ -84,7 +83,6 @@ export class VentasService {
       const venta = await tx.venta.create({
         data: {
           usuarioId,
-          cajaSesionId: cajaSesion.id,
           total,
           metodoPago: dto.metodoPago,
           montoEfectivo,
@@ -97,6 +95,7 @@ export class VentasService {
               descuento: d.descuento,
               unidadVendida: d.unidadVendida,
               factorUnidad: d.factorUnidad,
+              costoUnitario: d.costoUnitario,
             })),
           },
         },
@@ -115,27 +114,22 @@ export class VentasService {
         });
       }
 
-      if (montoEfectivo > 0) {
-        await tx.movimientoCaja.create({
-          data: {
-            cajaSesionId: cajaSesion.id,
-            ventaId: venta.id,
-            tipo: TipoMovimientoCaja.VENTA,
-            monto: montoEfectivo,
-            motivo: 'Venta',
-          },
-        });
-      }
-
       return venta;
     });
   }
 
   async anular(id: string, dto: AnularVentaDto, usuarioId: string) {
     const venta = await this.findOne(id);
-    if (venta.anulada) throw new BadRequestException('La venta ya está anulada');
 
     return this.prisma.$transaction(async (tx) => {
+      // Marcar primero y solo si sigue vigente: si dos anulaciones llegan a la vez, solo una
+      // pasa este filtro y el stock se devuelve una sola vez.
+      const marcada = await tx.venta.updateMany({
+        where: { id, anulada: false },
+        data: { anulada: true, motivoAnulacion: dto.motivo },
+      });
+      if (marcada.count === 0) throw new BadRequestException('La venta ya está anulada');
+
       for (const detalle of venta.detalles) {
         await tx.producto.update({
           where: { id: detalle.productoId },
@@ -152,22 +146,7 @@ export class VentasService {
         });
       }
 
-      if (venta.cajaSesionId && Number(venta.montoEfectivo) > 0) {
-        await tx.movimientoCaja.create({
-          data: {
-            cajaSesionId: venta.cajaSesionId,
-            ventaId: venta.id,
-            tipo: TipoMovimientoCaja.RETIRO,
-            monto: venta.montoEfectivo,
-            motivo: 'Anulación de venta',
-          },
-        });
-      }
-
-      return tx.venta.update({
-        where: { id },
-        data: { anulada: true, motivoAnulacion: dto.motivo },
-      });
+      return tx.venta.findUniqueOrThrow({ where: { id } });
     });
   }
 }
