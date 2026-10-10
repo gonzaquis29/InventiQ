@@ -1,11 +1,15 @@
-import type { ReactNode } from 'react';
-import { Info } from 'lucide-react';
+import type { ReactNode } from "react";
+import { Info } from "lucide-react";
 
 /** Ícono "i" con una explicación corta al pasar el mouse o enfocar con teclado. */
 export function InfoTip({ children }: { children: ReactNode }) {
   return (
     <span className="group relative inline-flex align-middle">
-      <button type="button" className="rounded-full text-ink-400 transition-colors hover:text-ink-700 focus-visible:text-ink-700 focus-visible:outline-none" aria-label="Más información">
+      <button
+        type="button"
+        className="rounded-full text-ink-400 transition-colors hover:text-ink-700 focus-visible:text-ink-700 focus-visible:outline-none"
+        aria-label="Más información"
+      >
         <Info size={14} />
       </button>
       <span

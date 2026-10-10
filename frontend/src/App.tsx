@@ -16,6 +16,7 @@ import Proveedores from '@/pages/Proveedores';
 import Configuracion from '@/pages/Configuracion';
 import Caja from '@/pages/Caja';
 import Reportes from '@/pages/Reportes';
+import Auditoria from '@/pages/Auditoria';
 
 export default function App() {
   return (
@@ -70,6 +71,14 @@ export default function App() {
                 }
               />
               <Route path="/caja" element={<Caja />} />
+              <Route
+                path="/auditoria"
+                element={
+                  <ProtectedRoute roles={['ADMIN']}>
+                    <Auditoria />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/reportes"
                 element={

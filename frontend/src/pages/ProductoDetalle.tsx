@@ -90,7 +90,7 @@ export default function ProductoDetalle() {
       })
       .finally(() => setCargando(false));
     api.get<MovimientoStock[]>(`/productos/${productoId}/movimientos`).then((res) => setMovimientos(res.data));
-    api.get<CompraHistorialProducto[]>('/compras', { params: { productoId } }).then((res) => setCompras(res.data));
+    if (esAdmin) api.get<CompraHistorialProducto[]>('/compras', { params: { productoId } }).then((res) => setCompras(res.data));
   }
 
   useEffect(() => {
@@ -363,6 +363,7 @@ export default function ProductoDetalle() {
             </div>
 
             <div className="space-y-6">
+              {esAdmin && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -395,6 +396,7 @@ export default function ProductoDetalle() {
                   )}
                 </CardContent>
               </Card>
+              )}
 
               <Card>
                 <CardHeader>

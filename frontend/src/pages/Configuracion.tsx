@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Tag, Award, Ruler } from 'lucide-react';
+import { Tag, Award, Ruler, Users } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { Card, CardContent } from '@/components/ui/Card';
 import { CatalogoSimple } from '@/components/configuracion/CatalogoSimple';
+import { UsuariosPanel } from '@/components/configuracion/UsuariosPanel';
 import { PageHeader } from '@/components/ui/PageHeader';
 
 const TABS = [
@@ -29,6 +30,13 @@ const TABS = [
       'Presets rápidos al agregar una unidad alternativa a un producto (ej. "docena" = 12). Deja el equivalente vacío si varía según el producto (ej. "caja"). La equivalencia real de cada producto se configura en su propia ficha, en Inventario.',
     conFactor: true,
   },
+  {
+    key: 'usuarios',
+    label: 'Usuarios',
+    icon: Users,
+    endpoint: '',
+    descripcion: '',
+  },
 ] as const;
 
 export default function Configuracion() {
@@ -39,7 +47,7 @@ export default function Configuracion() {
     <div>
       <PageHeader
         title="Configuración"
-        description="Catálogos que usa el resto del sistema — agrega, renombra o elimina sin tocar código."
+        description="Catálogos del sistema y el equipo de trabajo (usuarios y roles)."
         ayuda="configuracion"
       />
 
@@ -61,12 +69,16 @@ export default function Configuracion() {
 
       <Card>
         <CardContent>
-          <CatalogoSimple
-            key={tab.key}
-            endpoint={tab.endpoint}
-            descripcion={tab.descripcion}
-            conFactor={'conFactor' in tab ? tab.conFactor : false}
-          />
+          {tab.key === 'usuarios' ? (
+            <UsuariosPanel />
+          ) : (
+            <CatalogoSimple
+              key={tab.key}
+              endpoint={tab.endpoint}
+              descripcion={tab.descripcion}
+              conFactor={'conFactor' in tab ? tab.conFactor : false}
+            />
+          )}
         </CardContent>
       </Card>
     </div>

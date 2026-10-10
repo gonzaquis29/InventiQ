@@ -1,7 +1,7 @@
-import { useState, type ReactNode } from 'react';
-import { CircleHelp, Lightbulb, X } from 'lucide-react';
-import { AYUDA, type AyudaKey } from '@/lib/ayuda';
-import { cn } from '@/lib/cn';
+import { useState, type ReactNode } from "react";
+import { CircleHelp, Lightbulb, X } from "lucide-react";
+import { AYUDA, type AyudaKey } from "@/lib/ayuda";
+import { cn } from "@/lib/cn";
 
 const storageKey = (key: AyudaKey) => `inventiq.ayuda.${key}.oculta`;
 
@@ -14,21 +14,31 @@ interface PageHeaderProps {
   className?: string;
 }
 
-export function PageHeader({ title, description, actions, ayuda, className }: PageHeaderProps) {
-  const [ayudaVisible, setAyudaVisible] = useState(() => !!ayuda && localStorage.getItem(storageKey(ayuda)) !== '1');
+export function PageHeader({
+  title,
+  description,
+  actions,
+  ayuda,
+  className,
+}: PageHeaderProps) {
+  const [ayudaVisible, setAyudaVisible] = useState(
+    () => !!ayuda && localStorage.getItem(storageKey(ayuda)) !== "1",
+  );
 
   function toggleAyuda(visible: boolean) {
     if (!ayuda) return;
     setAyudaVisible(visible);
-    localStorage.setItem(storageKey(ayuda), visible ? '0' : '1');
+    localStorage.setItem(storageKey(ayuda), visible ? "0" : "1");
   }
 
   return (
-    <div className={cn('mb-6', className)}>
+    <div className={cn("mb-6", className)}>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <h1 className="font-display text-2xl font-bold text-ink-900">{title}</h1>
+            <h1 className="font-display text-2xl font-bold text-ink-900">
+              {title}
+            </h1>
             {ayuda && !ayudaVisible && (
               <button
                 type="button"
@@ -41,17 +51,29 @@ export function PageHeader({ title, description, actions, ayuda, className }: Pa
               </button>
             )}
           </div>
-          {description && <p className="mt-0.5 text-sm text-ink-500">{description}</p>}
+          {description && (
+            <p className="mt-0.5 text-sm text-ink-500">{description}</p>
+          )}
         </div>
-        {actions && <div className="flex flex-wrap items-end gap-2">{actions}</div>}
+        {actions && (
+          <div className="flex flex-wrap items-end gap-2">{actions}</div>
+        )}
       </div>
 
-      {ayuda && ayudaVisible && <PanelAyuda ayudaKey={ayuda} onCerrar={() => toggleAyuda(false)} />}
+      {ayuda && ayudaVisible && (
+        <PanelAyuda ayudaKey={ayuda} onCerrar={() => toggleAyuda(false)} />
+      )}
     </div>
   );
 }
 
-function PanelAyuda({ ayudaKey, onCerrar }: { ayudaKey: AyudaKey; onCerrar: () => void }) {
+function PanelAyuda({
+  ayudaKey,
+  onCerrar,
+}: {
+  ayudaKey: AyudaKey;
+  onCerrar: () => void;
+}) {
   const { resumen, pasos } = AYUDA[ayudaKey];
   return (
     <div className="relative mt-5 rounded-2xl border border-brand-100 bg-brand-50 px-6 py-5">
@@ -68,7 +90,9 @@ function PanelAyuda({ ayudaKey, onCerrar }: { ayudaKey: AyudaKey; onCerrar: () =
           <Lightbulb size={18} />
         </div>
         <div className="min-w-0 pr-6">
-          <p className="font-display text-sm font-bold text-ink-900">¿Cómo funciona?</p>
+          <p className="font-display text-sm font-bold text-ink-900">
+            ¿Cómo funciona?
+          </p>
           <p className="mb-3 text-sm text-ink-600">{resumen}</p>
           <ol className="space-y-2">
             {pasos.map((paso, i) => (
@@ -80,7 +104,11 @@ function PanelAyuda({ ayudaKey, onCerrar }: { ayudaKey: AyudaKey; onCerrar: () =
               </li>
             ))}
           </ol>
-          <button type="button" onClick={onCerrar} className="mt-4 text-sm font-medium text-brand-700 hover:text-brand-800">
+          <button
+            type="button"
+            onClick={onCerrar}
+            className="mt-4 text-sm font-medium text-brand-700 hover:text-brand-800"
+          >
             Entendido, ocultar
           </button>
         </div>

@@ -37,7 +37,7 @@ describe('Flujos críticos del negocio (e2e)', () => {
 
     // Base limpia en cada corrida.
     await prisma.$executeRawUnsafe(
-      'TRUNCATE TABLE usuarios, productos, categorias, ventas, compras, proveedores, gastos_caja, cuadres_caja RESTART IDENTITY CASCADE',
+      'TRUNCATE TABLE usuarios, productos, categorias, ventas, compras, proveedores, gastos_caja, cuadres_caja, audit_logs RESTART IDENTITY CASCADE',
     ).catch(async () => {
       // Si algún nombre de tabla difiere, limpia por modelos.
       await prisma.detalleVenta.deleteMany();

@@ -251,3 +251,22 @@ model CuadreCaja {
   @@index([createdAt])
   @@map("cuadres_caja")
 }
+
+// Registro de auditoría: quién hizo qué y cuándo. `usuarioNombre` es una copia del nombre al momento
+// de la acción (no se pierde si luego se edita o desactiva al usuario). `usuarioId` es null en
+// intentos de login fallidos.
+model AuditLog {
+  id            String   @id @default(uuid())
+  usuarioId     String?
+  usuarioNombre String
+  accion        String
+  entidad       String
+  entidadId     String?
+  detalle       String
+  createdAt     DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([accion])
+  @@index([usuarioId])
+  @@map("audit_logs")
+}

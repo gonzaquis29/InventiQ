@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Search, Plus, Check } from 'lucide-react';
-import { cn } from '@/lib/cn';
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Search, Plus, Check } from "lucide-react";
+import { cn } from "@/lib/cn";
 
 export interface SearchableOption {
   value: string;
@@ -14,7 +14,7 @@ export function SearchableSelect({
   options,
   onChange,
   onCreate,
-  placeholder = 'Buscar…',
+  placeholder = "Buscar…",
   allowClear = true,
 }: {
   id?: string;
@@ -41,7 +41,9 @@ export function SearchableSelect({
     return options.filter((o) => o.label.toLowerCase().includes(q));
   }, [texto, options]);
 
-  const coincideExacto = options.some((o) => o.label.toLowerCase() === texto.trim().toLowerCase());
+  const coincideExacto = options.some(
+    (o) => o.label.toLowerCase() === texto.trim().toLowerCase(),
+  );
 
   function abrir() {
     window.clearTimeout(cerrarTimeout.current);
@@ -75,13 +77,16 @@ export function SearchableSelect({
   return (
     <div className="relative">
       <div className="relative">
-        <Search size={14} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-ink-400" />
+        <Search
+          size={14}
+          className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-ink-400"
+        />
         <input
           id={id}
           value={texto}
           onChange={(e) => {
             setTexto(e.target.value);
-            if (e.target.value === '' && allowClear) onChange('', '');
+            if (e.target.value === "" && allowClear) onChange("", "");
           }}
           onFocus={abrir}
           onBlur={cerrarConDelay}
@@ -99,15 +104,19 @@ export function SearchableSelect({
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => elegir(o)}
               className={cn(
-                'flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-ink-50',
-                o.value === value ? 'text-brand-700 font-medium' : 'text-ink-800',
+                "flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-ink-50",
+                o.value === value
+                  ? "text-brand-700 font-medium"
+                  : "text-ink-800",
               )}
             >
               {o.label}
               {o.value === value && <Check size={14} />}
             </button>
           ))}
-          {filtradas.length === 0 && !onCreate && <p className="px-3 py-2 text-sm text-ink-400">Sin resultados.</p>}
+          {filtradas.length === 0 && !onCreate && (
+            <p className="px-3 py-2 text-sm text-ink-400">Sin resultados.</p>
+          )}
           {onCreate && texto.trim() && !coincideExacto && (
             <button
               type="button"
@@ -117,7 +126,7 @@ export function SearchableSelect({
               className="flex w-full items-center gap-1.5 border-t border-ink-100 px-3 py-2 text-left text-sm font-medium text-brand-600 hover:bg-brand-50"
             >
               <Plus size={14} />
-              {creando ? 'Creando…' : `Crear "${texto.trim()}"`}
+              {creando ? "Creando…" : `Crear "${texto.trim()}"`}
             </button>
           )}
         </div>

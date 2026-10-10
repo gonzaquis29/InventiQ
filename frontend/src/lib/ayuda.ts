@@ -75,6 +75,15 @@ export const AYUDA = {
       'Categorías y marcas sirven para ordenar y buscar productos en Inventario.',
       'Las unidades de compra (caja, paquete, docena…) se usan al registrar compras.',
       'Solo puedes borrar un elemento si ningún producto lo está usando.',
+      'En «Usuarios» creas las cuentas del equipo y eliges si son Administrador o Vendedor.',
+    ],
+  },
+  auditoria: {
+    resumen: 'El historial de lo que se hizo en el sistema: quién, qué y cuándo.',
+    pasos: [
+      'Cada venta, anulación, ajuste de stock, compra, gasto y cambio de usuarios queda registrado solo.',
+      'Filtra por tipo de acción o por fecha para encontrar algo puntual.',
+      'Los intentos de ingreso fallidos también aparecen, por si alguien intenta entrar sin permiso.',
     ],
   },
 } satisfies Record<string, AyudaPagina>;

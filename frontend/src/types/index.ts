@@ -143,3 +143,13 @@ export interface ResumenCajaDia {
   efectivoEsperado: number;
   cuadres: CuadreCaja[];
 }
+
+export interface EventoAuditoria {
+  id: string;
+  usuarioNombre: string;
+  accion: string;
+  entidad: string;
+  entidadId: string | null;
+  detalle: string;
+  createdAt: string;
+}

@@ -13,11 +13,13 @@ import { ComprasModule } from './compras/compras.module';
 import { VentasModule } from './ventas/ventas.module';
 import { CajaModule } from './caja/caja.module';
 import { ReportesModule } from './reportes/reportes.module';
+import { AuditoriaModule } from './auditoria/auditoria.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
+    AuditoriaModule,
     AuthModule,
     UsuariosModule,
     CategoriasModule,

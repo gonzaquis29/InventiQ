@@ -11,6 +11,7 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { AuthUser } from '../common/decorators/current-user.decorator';
 import { Rol } from '@prisma/client';
+import { Auditar } from '../auditoria/auditar.decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller('productos')
@@ -79,6 +80,7 @@ export class ProductosController {
     return this.productosService.removeUnidad(id, unidadId);
   }
 
+  @Auditar({ accion: 'PRODUCTO_CREADO', entidad: 'producto', entidadId: (r) => r.id, detalle: (r) => `Producto "${r.nombre}" creado` })
   @UseGuards(RolesGuard)
   @Roles(Rol.ADMIN)
   @Post()
@@ -86,6 +88,12 @@ export class ProductosController {
     return this.productosService.create(dto);
   }
 
+  @Auditar({
+    accion: 'PRODUCTO_EDITADO',
+    entidad: 'producto',
+    entidadId: (r) => r.id,
+    detalle: (r, req) => `Producto "${r.nombre}" editado (${Object.keys(req.body).join(', ')})`,
+  })
   @UseGuards(RolesGuard)
   @Roles(Rol.ADMIN)
   @Patch(':id')
@@ -93,6 +101,7 @@ export class ProductosController {
     return this.productosService.update(id, dto);
   }
 
+  @Auditar({ accion: 'PRODUCTO_ELIMINADO', entidad: 'producto', entidadId: (r) => r.id, detalle: (r) => `Producto "${r.nombre}" eliminado` })
   @UseGuards(RolesGuard)
   @Roles(Rol.ADMIN)
   @Delete(':id')
@@ -100,6 +109,11 @@ export class ProductosController {
     return this.productosService.remove(id);
   }
 
+  @Auditar({
+    accion: 'PRODUCTOS_IMPORTADOS',
+    entidad: 'producto',
+    detalle: (r) => `Importación: ${r.totalCreados} creados, ${r.totalOmitidos} omitidos`,
+  })
   @UseGuards(RolesGuard)
   @Roles(Rol.ADMIN)
   @Post('importar')
@@ -107,6 +121,13 @@ export class ProductosController {
     return this.productosService.importar(dto);
   }
 
+  @Auditar({
+    accion: 'STOCK_AJUSTADO',
+    entidad: 'producto',
+    entidadId: (r) => r.id,
+    detalle: (r, req) =>
+      `"${r.nombre}": ${req.body.cantidad > 0 ? '+' : ''}${req.body.cantidad} (stock ahora ${r.stock}). Motivo: ${req.body.motivo}`,
+  })
   @UseGuards(RolesGuard)
   @Roles(Rol.ADMIN)
   @Post(':id/ajustar-stock')

@@ -48,7 +48,7 @@ cd backend
 npm run crear-admin      # pregunta nombre, email y contraseña
 ```
 
-También acepta `ADMIN_NOMBRE`, `ADMIN_EMAIL` y `ADMIN_PASSWORD` como variables de entorno para correrlo sin preguntas (útil en la consola del hosting). Con ese usuario ya puedes iniciar sesión y crear el resto del equipo desde **Usuarios → Nuevo** dentro de la propia app. Si quieres datos de ejemplo (categorías/productos) para probar, crea tu propio `backend/prisma/seed.ts` local — `npm run seed` ya está configurado para correrlo, pero no se incluye uno en el repo.
+También acepta `ADMIN_NOMBRE`, `ADMIN_EMAIL` y `ADMIN_PASSWORD` como variables de entorno para correrlo sin preguntas (útil en la consola del hosting). Con ese usuario ya puedes iniciar sesión y crear el resto del equipo desde **Configuración → Usuarios → Nuevo usuario** dentro de la propia app. Si quieres datos de ejemplo (categorías/productos) para probar, crea tu propio `backend/prisma/seed.ts` local — `npm run seed` ya está configurado para correrlo, pero no se incluye uno en el repo.
 
 ### 2. Frontend
 
@@ -93,6 +93,10 @@ Variables obligatorias en el servidor: `DATABASE_URL`, `JWT_SECRET` (aleatorio, 
 | `npm run migrate:deploy` | Aplica migraciones pendientes (producción) |
 | `npx prisma studio` | Explorador visual de la base de datos |
 
+## Despliegue
+
+Guía gratuita paso a paso (Render + Neon + UptimeRobot) en [DEPLOY.md](DEPLOY.md).
+
 ## Pruebas
 
 ```bash
@@ -100,9 +104,9 @@ cd backend
 npm run test:e2e   # usa su propia base `inventiq_test` (se crea sola); requiere `npm run dev:db` corriendo
 ```
 
-Cubren venta sin caja, control de stock, ganancia con costo guardado, caja del día y cuadre, permisos, anulación (sin doble devolución), paginación y el reporte de menor rotación.
+Incluyen un recorrido completo del negocio (`lanzamiento.e2e-spec.ts`: primer admin, equipo, catálogo, compra, ventas, caja, anulación, reportes, roles y auditoría). Cubren venta sin caja, control de stock, ganancia con costo guardado, caja del día y cuadre, permisos, anulación (sin doble devolución), paginación y el reporte de menor rotación.
 
 ## Roles
 
-- **Administrador**: acceso total (usuarios, inventario, compras, proveedores, configuración, reportes).
+- **Administrador**: acceso total (usuarios, inventario, compras, proveedores, configuración, reportes, auditoría). Puede usar «Ver como vendedor» en el menú para revisar la vista del otro rol.
 - **Vendedor**: punto de venta, consulta de inventario, caja del día (gastos y cuadre). Sin acceso a compras/reportes/configuración.

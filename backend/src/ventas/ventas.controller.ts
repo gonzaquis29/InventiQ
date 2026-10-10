@@ -8,6 +8,7 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { AuthUser } from '../common/decorators/current-user.decorator';
 import { Rol } from '@prisma/client';
+import { Auditar } from '../auditoria/auditar.decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller('ventas')
@@ -34,11 +35,23 @@ export class VentasController {
     return this.ventasService.findOne(id);
   }
 
+  @Auditar({
+    accion: 'VENTA_CREADA',
+    entidad: 'venta',
+    entidadId: (r) => r.id,
+    detalle: (r) => `Venta de S/ ${Number(r.total).toFixed(2)} (${r.metodoPago}, ${r.detalles.length} ítem${r.detalles.length === 1 ? '' : 's'})`,
+  })
   @Post()
   create(@Body() dto: CreateVentaDto, @CurrentUser() user: AuthUser) {
     return this.ventasService.create(dto, user.userId);
   }
 
+  @Auditar({
+    accion: 'VENTA_ANULADA',
+    entidad: 'venta',
+    entidadId: (_r, req) => req.params.id,
+    detalle: (r, req) => `Venta de S/ ${Number(r.total).toFixed(2)} anulada. Motivo: ${req.body.motivo}`,
+  })
   @UseGuards(RolesGuard)
   @Roles(Rol.ADMIN)
   @Post(':id/anular')

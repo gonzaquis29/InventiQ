@@ -58,3 +58,44 @@ body {
 ::selection {
   background: var(--color-brand-200);
 }
+
+/* Foco visible y consistente para teclado */
+:focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 2px;
+}
+
+/* Filas de tabla: resaltado suave al pasar el mouse */
+tbody tr {
+  transition: background-color 120ms ease;
+}
+tbody tr:hover {
+  background-color: var(--color-ink-50);
+}
+
+/* Scrollbars finas y discretas */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-ink-200) transparent;
+}
+
+/* Entrada suave de página y modales */
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animar-entrada {
+  animation: aparecer 220ms ease-out backwards; /* sin "forwards": no deja transform residual que rompería position:fixed */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animar-entrada {
+    animation: none;
+  }
+}
