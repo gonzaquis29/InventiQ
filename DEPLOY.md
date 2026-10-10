@@ -1,6 +1,6 @@
 # Despliegue gratuito (Render + Neon)
 
-Todo en planes gratuitos, sin tarjeta: **Neon** (base de datos), **Render** (API y web) y **UptimeRobot** (mantener la API despierta).
+Todo en planes gratuitos, sin tarjeta: **Neon** (base de datos) y **Render** (API y web). **UptimeRobot es opcional** — solo si la API se queda sin usar 15+ minutos (ej. cuando haya múltiples vendedores). Ahora, con solo el admin, no es necesario.
 
 ## 1. Base de datos — Neon
 1. Crea una cuenta en https://neon.tech y un proyecto (región más cercana, ej. São Paulo).
@@ -29,12 +29,12 @@ DATABASE_URL="<string de Neon>" npm run crear-admin
 ```
 Luego entra a la web con ese usuario y crea al resto del equipo en **Configuración → Usuarios**. El inventario real se carga desde **Inventario → Importar**.
 
-## 4. Que la API no se duerma — UptimeRobot
-Render free duerme la API tras 15 min sin uso, y el primer pedido tarda ~50 s.
+## 4. Que la API no se duerma — UptimeRobot (opcional)
+**Render free duerme la API tras 15 min sin uso.** Si es solo el admin estos meses, no es problema. Cuando agregues vendedores y haya pausas de 15+ minutos sin actividad, agrega UptimeRobot:
 1. Cuenta gratis en https://uptimerobot.com → **Add monitor** → tipo HTTP(s).
 2. URL: `https://<tu-api>.onrender.com/api/health`, intervalo **5 minutos**.
 
-Render free da 750 horas al mes por cuenta: alcanza para **una** API encendida todo el mes (la web estática no cuenta). No crees más servicios *web* gratuitos en la misma cuenta.
+**Nota:** Render free da 750 horas al mes por cuenta: alcanza para **una** API encendida todo el mes (la web estática no cuenta). No crees más servicios *web* gratuitos en la misma cuenta.
 
 ## Límites a tener presentes
 - Neon se suspende tras 5 min sin consultas y despierta en ~1 s: la primera consulta después de un rato puede tardar un poco.
